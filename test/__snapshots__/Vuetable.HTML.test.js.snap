@@ -4,8 +4,7 @@ exports[`Vuetable - HTML structure renders HTML table 1`] = `
 <div
   class=""
 >
-  <!---->
-   
+  <!--v-if-->
   <div
     class="vuetable-body-wrapper"
   >
@@ -13,41 +12,60 @@ exports[`Vuetable - HTML structure renders HTML table 1`] = `
       class="vuetable ui blue selectable unstackable celled table fixed"
     >
       <colgroup>
+        
+        
         <col
           class="vuetable-col-code"
         />
+        
+        
         <col
           class="vuetable-col-description"
         />
-         
-        <!---->
+        
+        
+        <!--v-if-->
       </colgroup>
-       
       <thead>
+        
+        
         <tr>
+          
+          
+          
           <th
             class="vuetable-th-code"
             id="_code"
           >
             Code
           </th>
+          
+          
+          
+          
           <th
             class="vuetable-th-description"
             id="_description"
           >
             Description
           </th>
-           
-          <!---->
+          
+          
+          
+          <!--v-if-->
         </tr>
+        
+        
       </thead>
-       
-      <tfoot />
-       
+      <tfoot>
+        
+        
+      </tfoot>
       <tbody
         class="vuetable-body"
       >
-         
+        
+        
         <tr>
           <td
             class="vuetable-empty-result"
@@ -56,7 +74,8 @@ exports[`Vuetable - HTML structure renders HTML table 1`] = `
             No Data Available
           </td>
         </tr>
-         
+        
+        
       </tbody>
     </table>
   </div>
