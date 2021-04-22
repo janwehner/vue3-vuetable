@@ -4,15 +4,15 @@
       <template v-if="field.visible">
         <template v-if="vuetable.isFieldComponent(field.name)">
           <component :is="field.name"
-            :row-field="field"
-            :is-header="true"
-            :title="renderTitle(field)"
-            :vuetable="vuetable"
-            :key="fieldIndex"
-            :class="headerClass('vuetable-th-component', field)"
-            :style="{width: field.width}"
-            @vuetable:header-event="vuetable.onHeaderEvent"
-            @click="onColumnHeaderClicked(field, $event)"
+                     :row-field="field"
+                     :is-header="true"
+                     :title="renderTitle(field)"
+                     :vuetable="vuetable"
+                     :key="fieldIndex"
+                     :class="headerClass('vuetable-th-component', field)"
+                     :style="{width: field.width}"
+                     @vuetable:header-event="vuetable.onHeaderEvent"
+                     @click="onColumnHeaderClicked(field, $event)"
           ></component>
         </template>
         <template v-else-if="vuetable.isFieldSlot(field.name)">
@@ -25,11 +25,11 @@
         </template>
         <template v-else>
           <th @click="onColumnHeaderClicked(field, $event)"
-            :key="fieldIndex"
-            :id="'_' + field.name"
-            :class="headerClass('vuetable-th', field)"
-            :style="{width: field.width}"
-            v-html="renderTitle(field)"
+              :key="fieldIndex"
+              :id="'_' + field.name"
+              :class="headerClass('vuetable-th', field)"
+              :style="{width: field.width}"
+              v-html="renderTitle(field)"
           ></th>
         </template>
       </template>
@@ -45,7 +45,7 @@ import VuetableColGutter from './VuetableColGutter'
 
 export default {
   components: {
-    'vuetable-field-checkbox': VuetableFieldCheckbox, 
+    'vuetable-field-checkbox': VuetableFieldCheckbox,
     'vuetable-field-handle'  : VuetableFieldHandle,
     'vuetable-field-sequence': VuetableFieldSequence,
     VuetableColGutter
@@ -164,8 +164,8 @@ export default {
        * ex. 6 fields are selected: 1.0, 0.86, 0.72, 0.58, 0.44, 0.3
        */
       let max = 1.0,
-          min = 0.3,
-          step = 0.3
+        min = 0.3,
+        step = 0.3
 
       let count = this.sortOrder.length;
       let current = this.currentSortOrderPosition(field)

@@ -2,12 +2,12 @@
   <div :class="$_css.tableWrapper">
     <div class="vuetable-head-wrapper" v-if="isFixedHeader">
       <table :class="['vuetable', $_css.tableClass, $_css.tableHeaderClass]">
-        <vuetable-col-group :is-header="true"/>
+        <vuetable-col-group :is-header="true" :fieldPrefix="fieldPrefix" />
         <thead>
           <slot name="tableHeader" :fields="tableFields">
-            <template v-for="(header, headerIndex) in headerRows">
-              <component :is="header" :key="headerIndex"
-                @vuetable:header-event="onHeaderEvent"
+            <template v-for="(header, headerIndex) in headerRows" :key="headerIndex">
+              <component :is="header"
+                         @vuetable:header-event="onHeaderEvent"
               ></component>
             </template>
           </slot>
@@ -17,96 +17,92 @@
 
     <div class="vuetable-body-wrapper" :class="{'fixed-header' : isFixedHeader}" :style="{height: tableHeight}">
       <table :class="['vuetable', isFixedHeader ? 'fixed-header' : '', $_css.tableClass, $_css.tableBodyClass]">
-      <vuetable-col-group/>
-      <thead v-if="!isFixedHeader">
-      <slot name="tableHeader" :fields="tableFields">
-        <template v-for="(header, headerIndex) in headerRows">
-          <component :is="header" :key="headerIndex"
-            @vuetable:header-event="onHeaderEvent"
-          ></component>
-        </template>
-      </slot>
-      </thead>
-      <tfoot>
-        <slot name="tableFooter" :fields="tableFields"></slot>
-      </tfoot>
-      <tbody v-cloak class="vuetable-body">
-        <template v-for="(item, itemIndex) in tableData">
-          <tr :item-index="itemIndex"
-            :key="itemIndex"
-            :class="onRowClass(item, itemIndex)"
-            @click="onRowClicked(item, itemIndex, $event)"
-            @dblclick="onRowDoubleClicked(item, itemIndex, $event)"
-            @mouseover="onMouseOver(item, itemIndex, $event)"
-          >
-            <template v-for="(field, fieldIndex) in tableFields">
-              <template v-if="field.visible">
-                <template v-if="isFieldComponent(field.name)">
-                  <component :is="field.name"
-                    :key="fieldIndex"
-                    :row-data="item" :row-index="itemIndex" :row-field="field"
-                    :vuetable="vuetable"
-                    :class="bodyClass('vuetable-component', field)"
-                    :style="{width: field.width}"
-                    @vuetable:field-event="onFieldEvent"
-                  ></component>
-                </template>
-                <template v-else-if="isFieldSlot(field.name)">
-                  <td :class="bodyClass('vuetable-slot', field)"
-                    :key="fieldIndex"
-                    :style="{width: field.width}"
-                  >
-                    <slot :name="field.name"
-                      :row-data="item" :row-index="itemIndex" :row-field="field"
-                    ></slot>
-                  </td>
-                </template>
-                <template v-else>
-                  <td :class="bodyClass('vuetable-td-'+field.name, field)"
-                    :key="fieldIndex"
-                    :style="{width: field.width}"
-                    v-html="renderNormalField(field, item)"
-                    @click="onCellClicked(item, itemIndex, field, $event)"
-                    @dblclick="onCellDoubleClicked(item, itemIndex, field, $event)"
-                    @contextmenu="onCellRightClicked(item, itemIndex, field, $event)"
-                  ></td>
+        <vuetable-col-group :fieldPrefix="fieldPrefix" />
+        <thead v-if="!isFixedHeader">
+          <slot name="tableHeader" :fields="tableFields">
+            <template v-for="(header, headerIndex) in headerRows" :key="headerIndex">
+              <component :is="header"
+                         @vuetable:header-event="onHeaderEvent"
+              ></component>
+            </template>
+          </slot>
+        </thead>
+        <tfoot>
+          <slot name="tableFooter" :fields="tableFields"></slot>
+        </tfoot>
+        <tbody v-cloak class="vuetable-body">
+          <template v-for="(item, itemIndex) in tableData" :key="itemIndex">
+            <tr :item-index="itemIndex"
+                :class="onRowClass(item, itemIndex)"
+                @click="onRowClicked(item, itemIndex, $event)"
+                @dblclick="onRowDoubleClicked(item, itemIndex, $event)"
+                @mouseover="onMouseOver(item, itemIndex, $event)"
+            >
+              <template v-for="(field, fieldIndex) in tableFields" :key="fieldIndex">
+                <template v-if="field.visible">
+                  <template v-if="isFieldComponent(field.name)">
+                    <component :is="field.name"
+                               :row-data="item" :row-index="itemIndex" :row-field="field"
+                               :vuetable="vuetable"
+                               :class="bodyClass('vuetable-component', field)"
+                               :style="{width: field.width}"
+                               @vuetable:field-event="onFieldEvent"
+                    ></component>
+                  </template>
+                  <template v-else-if="isFieldSlot(field.name)">
+                    <td :class="bodyClass('vuetable-slot', field)"
+                        :style="{width: field.width}"
+                    >
+                      <slot :name="field.name"
+                            :row-data="item" :row-index="itemIndex" :row-field="field"
+                      ></slot>
+                    </td>
+                  </template>
+                  <template v-else>
+                    <td :class="bodyClass('vuetable-td-'+field.name, field)"
+                        :style="{width: field.width}"
+                        v-html="renderNormalField(field, item)"
+                        @click="onCellClicked(item, itemIndex, field, $event)"
+                        @dblclick="onCellDoubleClicked(item, itemIndex, field, $event)"
+                        @contextmenu="onCellRightClicked(item, itemIndex, field, $event)"
+                    ></td>
+                  </template>
                 </template>
               </template>
+            </tr>
+            <template v-if="useDetailRow" :key="itemIndex">
+              <transition :name="detailRowTransition">
+                <tr v-if="isVisibleDetailRow(item[trackBy])"
+                    @click="onDetailRowClick(item, itemIndex, $event)"
+                    :class="onDetailRowClass(item, itemIndex)"
+                >
+                  <td :colspan="countVisibleFields">
+                    <component :is="detailRowComponent"
+                               :row-data="item"
+                               :row-index="itemIndex"
+                               :options="detailRowOptions"
+                    ></component>
+                  </td>
+                </tr>
+              </transition>
             </template>
-          </tr>
-          <template v-if="useDetailRow">
-            <transition :name="detailRowTransition" :key="itemIndex">
-              <tr v-if="isVisibleDetailRow(item[trackBy])"
-                @click="onDetailRowClick(item, itemIndex, $event)"
-                :class="onDetailRowClass(item, itemIndex)"
-              >
-                <td :colspan="countVisibleFields">
-                  <component :is="detailRowComponent"
-                    :row-data="item"
-                    :row-index="itemIndex"
-                    :options="detailRowOptions"
-                  ></component>
-                </td>
-              </tr>
-            </transition>
           </template>
-        </template>
-        <template v-if="displayEmptyDataRow">
-          <tr>
-            <td :colspan="countVisibleFields"
-              class="vuetable-empty-result"
-              v-html="noDataTemplate"
-            ></td>
-          </tr>
-        </template>
-        <template v-if="lessThanMinRows">
-          <tr v-for="i in blankRows" class="blank-row" :key="i">
-            <template v-for="(field, fieldIndex) in tableFields">
-              <td v-if="field.visible" :key="fieldIndex">&nbsp;</td>
-            </template>
-          </tr>
-        </template>
-      </tbody>
+          <template v-if="displayEmptyDataRow">
+            <tr>
+              <td :colspan="countVisibleFields"
+                  class="vuetable-empty-result"
+                  v-html="noDataTemplate"
+              ></td>
+            </tr>
+          </template>
+          <template v-if="lessThanMinRows">
+            <tr v-for="i in blankRows" class="blank-row">
+              <template v-for="(field, fieldIndex) in tableFields">
+                <td v-if="field.visible">&nbsp;</td>
+              </template>
+            </tr>
+          </template>
+        </tbody>
       </table>
     </div>
   </div>
@@ -197,8 +193,8 @@ export default {
       default: null
     },
     perPage: {
-        type: Number,
-        default: 10
+      type: Number,
+      default: 10
     },
     /**
      * Page that should be displayed when the table is first displayed
@@ -413,7 +409,7 @@ export default {
     }
   },
 
-  destroyed () {
+  unmounted () {
     let elem = this.$el.getElementsByClassName('vuetable-body-wrapper')[0];
     if (elem != null) {
       elem.removeEventListener('scroll', this.handleScroll);
@@ -442,13 +438,13 @@ export default {
     },
 
     fields (newVal, oldVal) {
-    	this.normalizeFields();
+      this.normalizeFields();
     },
 
     perPage (newVal, oldVal) {
       this.reload();
     }
-},
+  },
 
   methods: {
 
@@ -611,7 +607,7 @@ export default {
     },
 
     isFieldSlot (fieldName) {
-      return typeof this.$scopedSlots[fieldName] !== 'undefined'
+      return typeof this.$slots[fieldName] !== 'undefined'
     },
 
     titleCase (str) {
@@ -635,8 +631,8 @@ export default {
       this.httpOptions['params'] = this.getAppendParams( this.getAllQueryParams() )
 
       return this.fetch(this.apiUrl, this.httpOptions).then(
-          success,
-          failed
+        success,
+        failed
       ).catch(() => failed())
     },
 
@@ -866,7 +862,7 @@ export default {
       if ( ! this.hasFormatter(field)) return
 
       if (typeof(field.formatter) === 'function') {
-       return field.formatter(this.getObjectValue(item, field.name), this)
+        return field.formatter(this.getObjectValue(item, field.name), this)
       }
     },
 
@@ -1152,34 +1148,34 @@ export default {
 </script>
 
 <style>
-  [v-cloak] {
-    display: none;
-  }
-  table.vuetable.fixed-header {
-    table-layout: fixed;
-  }
-  .vuetable th.sortable:hover {
-    color: #2185d0;
-    cursor: pointer;
-  }
-  .vuetable-head-wrapper {
-    overflow-x: hidden;
-  }
-  .vuetable-head-wrapper table.vuetable {
-    border-bottom-left-radius: 0px;
-    border-bottom-right-radius: 0px;
-  }
-  .vuetable-body-wrapper.fixed-header {
-    position:relative;
-    overflow-y:auto;
-  }
-  .vuetable-body-wrapper table.vuetable.fixed-header {
-    border-top:none !important;
-    margin-top:0 !important;
-    border-top-left-radius: 0px;
-    border-top-right-radius: 0px;
-  }
-  .vuetable-empty-result {
-    text-align: center;
-  }
+[v-cloak] {
+  display: none;
+}
+table.vuetable.fixed-header {
+  table-layout: fixed;
+}
+.vuetable th.sortable:hover {
+  color: #2185d0;
+  cursor: pointer;
+}
+.vuetable-head-wrapper {
+  overflow-x: hidden;
+}
+.vuetable-head-wrapper table.vuetable {
+  border-bottom-left-radius: 0px;
+  border-bottom-right-radius: 0px;
+}
+.vuetable-body-wrapper.fixed-header {
+  position:relative;
+  overflow-y:auto;
+}
+.vuetable-body-wrapper table.vuetable.fixed-header {
+  border-top:none !important;
+  margin-top:0 !important;
+  border-top-left-radius: 0px;
+  border-top-right-radius: 0px;
+}
+.vuetable-empty-result {
+  text-align: center;
+}
 </style>

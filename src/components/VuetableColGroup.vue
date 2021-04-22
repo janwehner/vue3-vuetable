@@ -2,15 +2,15 @@
   <colgroup>
     <template v-for="(field, fieldIndex) in vuetable.tableFields">
       <template v-if="field.visible">
-      <col :key="fieldIndex"
-          :style="{width: field.width}"
-          :class="columnClass(field, fieldIndex)"
-      >
+        <col :key="fieldIndex"
+             :style="{width: field.width}"
+             :class="columnClass(field, fieldIndex)"
+        >
       </template>
     </template>
-    <col v-if="isHeader && vuetable.scrollVisible" 
-      :style="{width: vuetable.scrollBarWidth}" 
-      class="vuetable-col-gutter"
+    <col v-if="isHeader && vuetable.scrollVisible"
+         :style="{width: vuetable.scrollBarWidth}"
+         class="vuetable-col-gutter"
     >
   </colgroup>
 </template>
@@ -23,6 +23,12 @@ export default {
     isHeader: {
       type: Boolean,
       default: false
+    },
+    fieldPrefix: {
+      type: String,
+      default() {
+        return 'vuetable-field-'
+      }
     }
   },
 
