@@ -1,5 +1,5 @@
-import Vue from 'vue'
-import { mount, shallow } from '@vue/test-utils'
+import { createApp } from 'vue'
+import { mount, shallowMount } from '@vue/test-utils'
 import Vuetable from '@/components/Vuetable.vue'
 
 describe('Vuetable - Computed properties', () => {
@@ -22,7 +22,7 @@ describe('Vuetable - Computed properties', () => {
     }
   })
 
-  const shallowVuetable = (fields) => shallow(Vuetable, {
+  const shallowVuetable = (fields) => shallowMount(Vuetable, {
     propsData: {
       loadOnStart: false,
       fields
@@ -30,7 +30,7 @@ describe('Vuetable - Computed properties', () => {
   })
 
   it('countVisibleFields', () => {
-    let wrapper = mountVuetable(['code', 'description'])
+    const  wrapper = mountVuetable(['code', 'description'])
 
     expect(wrapper.vm.countVisibleFields).toEqual(2)
     wrapper.vm.tableFields[0].visible = false
@@ -38,7 +38,7 @@ describe('Vuetable - Computed properties', () => {
   })
 
   it('countTableData', () => {
-    let wrapper = mountVuetable(['code'])
+    const  wrapper = mountVuetable(['code'])
 
     expect(wrapper.vm.countTableData).toEqual(0)
     wrapper.vm.setData([
@@ -48,14 +48,17 @@ describe('Vuetable - Computed properties', () => {
     expect(wrapper.vm.countTableData).toEqual(2)
   })
 
-  it('displayEmptyDataRow', () => {
-    let wrapper = mountVuetable(['code'])
+  it('displayEmptyDataRow', async () => {
+    const  wrapper = mountVuetable(['code'])
 
     // where there's no data
     expect(wrapper.vm.displayEmptyDataRow).toBe(true)
 
     // when there are no data, but no-data-template is empty
-    wrapper.vm.noDataTemplate = ''
+    await wrapper.setProps({
+      noDataTemplate: ''
+    })
+
     expect(wrapper.vm.displayEmptyDataRow).toBe(false)
 
     // when there are data
@@ -67,8 +70,8 @@ describe('Vuetable - Computed properties', () => {
   })
 
   describe('useDetailRow', () => {
-
-    const detailRow = Vue.component('detail-row', {
+    const app = createApp({})
+    const detailRow = app.component('detail-row', {
       template: `<div>AAA</div>`
     })
 
@@ -79,23 +82,23 @@ describe('Vuetable - Computed properties', () => {
       }
     })
 
-    it('returns false when data is not available', () => {
-      let wrapper = mountVuetable()
-      wrapper.setProps({ detailRowComponent: detailRow})
+    it('returns false when data is not available', async () => {
+      const  wrapper = mountVuetable()
+      await wrapper.setProps({ detailRowComponent: detailRow})
 
       expect(wrapper.vm.useDetailRow).toBe(false)
     })
 
     it('returns false when data is available, but detail-row-component was not specified', () => {
-      let wrapper = mountVuetable()
+      const  wrapper = mountVuetable()
       wrapper.vm.setData([{ code: 'AAA' }])
 
       expect(wrapper.vm.useDetailRow).toBe(false)
     })
 
-    it('returns true when both the data and detail-row-component are available', () => {
-      let wrapper = mountVuetable()
-      wrapper.setProps({ 
+    it('returns true when both the data and detail-row-component are available', async () => {
+      const  wrapper = mountVuetable()
+      await wrapper.setProps({
         detailRowComponent: detailRow,
         data: [ {code: 'AAA'} ]
       })
@@ -105,7 +108,7 @@ describe('Vuetable - Computed properties', () => {
   })
 
   describe('dataIsAvailable', () => {
-    const mountVuetable = () => shallow(Vuetable, {
+    const mountVuetable = () => shallowMount(Vuetable, {
       propsData: {
         apiMode: false,
         fields: ['code'],
@@ -113,14 +116,14 @@ describe('Vuetable - Computed properties', () => {
     })
 
     it('return false when data is not available', () => {
-      let wrapper = mountVuetable()
+      const  wrapper = mountVuetable()
 
       expect(wrapper.vm.dataIsAvailable).toBe(false)
     })
 
-    it('return true when data is available', () => {
-      let wrapper = mountVuetable()
-      wrapper.setProps({
+    it('return true when data is available', async () => {
+      const  wrapper = mountVuetable()
+      await wrapper.setProps({
         data: [{ code: 'AAA'}]
       })
 
@@ -129,7 +132,7 @@ describe('Vuetable - Computed properties', () => {
   })
 
   describe('hasRowIdentifier', () => {
-    const mountVuetable = () => shallow(Vuetable, {
+    const mountVuetable = () => shallowMount(Vuetable, {
       propsData: {
         apiMode: false,
         fields: ['code'],
@@ -138,14 +141,14 @@ describe('Vuetable - Computed properties', () => {
     })
 
     it('return false when row identifier cannot be found in the given data', () => {
-      let wrapper = mountVuetable()
+      const  wrapper = mountVuetable()
 
       expect(wrapper.vm.hasRowIdentifier).toBe(false)
     })
 
-    it('return true when row identifier can be found in the given data', () => {
-      let wrapper = mountVuetable()
-      wrapper.setProps({
+    it('return true when row identifier can be found in the given data', async () => {
+      const  wrapper = mountVuetable()
+      await wrapper.setProps({
         trackBy: 'code'
       })
 
@@ -154,9 +157,9 @@ describe('Vuetable - Computed properties', () => {
   })
 
   describe('lessThanMinRows', () => {
-    
+
     const mountVuetable = () => {
-      return shallow(Vuetable, {
+      return shallowMount(Vuetable, {
         propsData: {
           apiMode: false,
           fields: ['code'],
@@ -169,14 +172,14 @@ describe('Vuetable - Computed properties', () => {
     }
 
     it('returns true when available data has less row than min-rows prop', () => {
-      let wrapper = mountVuetable()
+      const  wrapper = mountVuetable()
 
       expect(wrapper.vm.lessThanMinRows).toBe(true)
     })
 
-    it('returns false when available data has at least the same number specified in min-rows', () => {
-      let wrapper = mountVuetable()
-      wrapper.setProps({
+    it('returns false when available data has at least the same number specified in min-rows', async () => {
+      const  wrapper = mountVuetable()
+      await wrapper.setProps({
         minRows: 1
       })
 
@@ -187,7 +190,7 @@ describe('Vuetable - Computed properties', () => {
   describe('blankRows', () => {
 
     const mountVuetable = (minRows, data) => {
-      return shallow(Vuetable, {
+      return shallowMount(Vuetable, {
         propsData: {
           apiMode: false,
           fields: ['code'],

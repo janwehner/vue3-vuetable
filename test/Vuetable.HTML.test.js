@@ -1,5 +1,4 @@
-import Vue from 'vue'
-import { mount, shallow } from '@vue/test-utils'
+import { mount } from '@vue/test-utils'
 import Vuetable from '@/components/Vuetable.vue'
 
 describe('Vuetable - HTML structure', () => {
@@ -12,7 +11,7 @@ describe('Vuetable - HTML structure', () => {
   })
 
   it('renders HTML table', () => {
-    let wrapper = mountVuetable([
+    const wrapper = mountVuetable([
       'code', 'description'
     ])
 

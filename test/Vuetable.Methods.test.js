@@ -1,6 +1,6 @@
-import Vue from 'vue'
-import { mount, shallow } from '@vue/test-utils'
-import Vuetable from '@/components/Vuetable.vue'
+import { mount, shallowMount } from '@vue/test-utils'
+import Vuetable from '@/components/Vuetable.vue';
+import {createApp, defineComponent, nextTick} from "vue";
 
 describe('Vuetable - Methods', () => {
 
@@ -22,7 +22,7 @@ describe('Vuetable - Methods', () => {
     }
   })
 
-  const shallowVuetable = (fields) => shallow(Vuetable, {
+  const shallowVuetable = (fields) => shallowMount(Vuetable, {
     propsData: {
       loadOnStart: false,
       fields
@@ -32,12 +32,12 @@ describe('Vuetable - Methods', () => {
   describe('normalizeFields', () => {
 
     it('copies additional options to fields definition as well', () => {
-      let wrapper = shallowVuetable([
+      const wrapper = shallowVuetable([
         { name: 'code', title: 'Product Code', options: {} },
         { name: 'description', foo: 'bar', baz: () => 'bee' }
       ])
 
-      let fields = wrapper.vm.tableFields
+      const fields = wrapper.vm.tableFields
       expect(fields.length).toEqual(2)
       expect(fields[0].name).toEqual('code')
       expect(fields[0].title).toEqual('Product Code')
@@ -54,7 +54,7 @@ describe('Vuetable - Methods', () => {
 
   describe('checkIfRowIdentifierExists', () => {
 
-    const mountVuetable = (trackBy = 'id') => shallow(Vuetable, {
+    const mountVuetable = (trackBy = 'id') => shallowMount(Vuetable, {
       propsData: {
         apiMode: false,
         fields: ['code'],
@@ -64,19 +64,20 @@ describe('Vuetable - Methods', () => {
     })
 
     it('gives warning when row identifier is invalid', () => {
-      let wrapper = mountVuetable()
+      const wrapper = mountVuetable()
 
       expect(wrapper.vm.checkIfRowIdentifierExists()).toBe(false)
       expect(console.warn).toHaveBeenCalledTimes(1)
     })
 
     it('returns true when row identifier is valid', (done) => {
-      let wrapper = mountVuetable('code')
+      const app = createApp({})
+      const wrapper = mountVuetable('code')
 
       expect(wrapper.vm.trackBy).toEqual('code')
 
-      Vue.config.errorHandler = done
-      Vue.nextTick( () => {
+      app.config.errorHandler = done
+      nextTick( () => {
           expect(wrapper.vm.checkIfRowIdentifierExists()).toBe(true)
           done()
       })
@@ -86,7 +87,7 @@ describe('Vuetable - Methods', () => {
   describe('fireEvent', () => {
 
     it('emits given event with prefix', () => {
-      let wrapper = shallowVuetable(['code'])
+      const wrapper = shallowVuetable(['code'])
 
       wrapper.vm.fireEvent('dummy', 'abcd')
       expect(wrapper.emitted()['vuetable:dummy']).toEqual([['abcd']])
@@ -99,44 +100,45 @@ describe('Vuetable - Methods', () => {
     const pagination = {'total': 0}
 
     it('emits loading and loaded events when argument is Array', () => {
-      let wrapper = shallowVuetable(['code'])
+      const wrapper = shallowVuetable(['code'])
 
       wrapper.vm.setData(data)
 
-      let emitted = wrapper.emitted()
+      const emitted = wrapper.emitted()
       expect(emitted).toHaveProperty('vuetable:loading')
       expect(emitted).toHaveProperty('vuetable:loaded')
-      expect(wrapper.vm.tableData).toBe(data)
+      expect(wrapper.vm.tableData).toStrictEqual(data)
     })
 
     it('emits loading and loaded events when argument is Object', (done) => {
-      let wrapper = shallowVuetable(['code'])
+      const app = createApp({})
+      const wrapper = shallowVuetable(['code'])
 
       wrapper.vm.setData({
         'pagination': pagination,
         'data': data,
       })
 
-      Vue.config.errorHandler = done
-      Vue.nextTick( () => {
-        let emitted = wrapper.emitted()
+      app.config.errorHandler = done
+      nextTick( () => {
+        const emitted = wrapper.emitted()
         expect(emitted).toHaveProperty('vuetable:loading')
         expect(emitted).toHaveProperty('vuetable:loaded')
-        expect(wrapper.vm.tableData).toBe(data)
+        expect(wrapper.vm.tableData).toStrictEqual(data)
         done()
       })
     })
 
     it('set tableData when argument is Array', () => {
-      let wrapper = shallowVuetable(['code'])
+      const wrapper = shallowVuetable(['code'])
 
       wrapper.vm.setData(data)
 
-      expect(wrapper.vm.tableData).toBe(data)
+      expect(wrapper.vm.tableData).toStrictEqual(data)
     })
 
     it('set tableData and tablePagination when argument is Object', () => {
-      let wrapper = shallow(Vuetable, {
+      const wrapper = shallowMount(Vuetable, {
         propsData: {
           apiMode: false,
           fields: ['code'],
@@ -144,23 +146,24 @@ describe('Vuetable - Methods', () => {
           paginationPath: 'pagination'
         }
       })
-      
+
       wrapper.vm.setData({
         'pagination': pagination,
         'data': data,
       })
 
-      expect(wrapper.vm.tableData).toBe(data)
-      expect(wrapper.vm.tablePagination).toBe(pagination)
+      expect(wrapper.vm.tableData).toStrictEqual(data)
+      expect(wrapper.vm.tablePagination).toStrictEqual(pagination)
     })
   })
 
   describe('normalizeFieldName', () => {
-    let dummyComponent = Vue.component('dummy', {
+    const app = createApp({})
+    const dummyComponent = defineComponent({
       template: `<div></div>`
     })
 
-    let wrapper = shallowVuetable([
+    const wrapper = shallowVuetable([
       'code',
       '__checkbox',
       { name: dummyComponent },
@@ -175,12 +178,12 @@ describe('Vuetable - Methods', () => {
     })
 
     it('returns the Object if field name is an Object', () => {
-      expect(wrapper.vm.tableFields[2].name).toBe(dummyComponent)
+      expect(wrapper.vm.tableFields[2].name).toStrictEqual(dummyComponent)
     })
   })
 
   describe('isFieldComponent', () => {
-    let wrapper = shallowVuetable(['code'])
+    const wrapper = shallowVuetable(['code'])
 
     it('returns true if given name is of type Object (VueComponent)', () => {
       expect(wrapper.vm.isFieldComponent(Object)).toBe(true)
@@ -201,11 +204,11 @@ describe('Vuetable - Methods', () => {
   })
 
   describe('makeTitle', () => {
-    let dummyComponent = Vue.component('dummy', {
-      template: `<div />`
+    const dummyComponent = defineComponent({
+      template: `<div></div>`
     })
 
-    let wrapper = shallowVuetable(['code'])
+    const wrapper = shallowVuetable(['code'])
 
     it('returns empty string if the given name is field component', () => {
       expect(wrapper.vm.makeTitle(dummyComponent)).toBe('')
@@ -224,7 +227,7 @@ describe('Vuetable - Methods', () => {
   })
 
   describe('getFieldTitle', () => {
-    let wrapper = shallowVuetable([
+    const wrapper = shallowVuetable([
       'code',
       {
         name: 'description',
@@ -253,7 +256,7 @@ describe('Vuetable - Methods', () => {
       return 'dummy'
     }
 
-    const mountVuetable = (queryParams) => shallow(Vuetable, {
+    const mountVuetable = (queryParams) => shallowMount(Vuetable, {
       propsData: {
         apiMode: false,
         fields: ['code'],
@@ -262,7 +265,7 @@ describe('Vuetable - Methods', () => {
     })
 
     it('calls `query-params` if it is a Function', () => {
-      let wrapper = mountVuetable(q1)
+      const wrapper = mountVuetable(q1)
 
       expect(wrapper.vm.getAllQueryParams()).toEqual({
         sortOrder: [], currentPage: 1, perPage: 10
@@ -270,34 +273,34 @@ describe('Vuetable - Methods', () => {
     })
 
     it('returns empty object if the given Function does not return an Object', () => {
-      let wrapper = mountVuetable(q2)
+      const wrapper = mountVuetable(q2)
 
       expect(wrapper.vm.getAllQueryParams()).toEqual({})
     })
   })
 
   describe('isSortable', () => {
-    
+
     it('returns false if the given field did not define "sortField" option', () => {
-      let wrapper = shallowVuetable(['code'])
-      let field = wrapper.vm.tableFields[0]
+      const wrapper = shallowVuetable(['code'])
+      const field = wrapper.vm.tableFields[0]
 
       expect(wrapper.vm.isSortable(field)).toEqual(false)
     })
 
     it('returns true if the given field defined "sortField" option', () => {
-      let wrapper = shallowVuetable([
+      const wrapper = shallowVuetable([
         { name: 'code', sortField: 'code' }
       ])
-      let field = wrapper.vm.tableFields[0]
+      const field = wrapper.vm.tableFields[0]
 
       expect(wrapper.vm.isSortable(field)).toBe(true)
-    })    
+    })
   })
 
   describe('getDefaultSortParam', () => {
 
-    const mountVuetable = (sortOrder) => shallow(Vuetable, {
+    const mountVuetable = (sortOrder) => shallowMount(Vuetable, {
       propsData: {
         apiMode: false,
         fields: ['code'],
@@ -306,7 +309,7 @@ describe('Vuetable - Methods', () => {
     })
 
     it('returns single sortOrder into sort params', () => {
-      let wrapper = mountVuetable([
+      const wrapper = mountVuetable([
         { field: 'code', sortField: 'code', direction: 'asc' },
       ])
 
@@ -314,7 +317,7 @@ describe('Vuetable - Methods', () => {
     })
 
     it('returns consolidated multiple sortOrder into sort param', () => {
-      let wrapper = mountVuetable([
+      const wrapper = mountVuetable([
         { field: 'code', sortField: 'code', direction: 'asc' },
         { field: 'group.description', sortField: 'group_id', direction: 'desc' }
       ])
@@ -324,17 +327,17 @@ describe('Vuetable - Methods', () => {
   })
 
   describe('getObjectValue', () => {
-    let obj = { 
-      code: 'aaa', 
-      address: { 
+    const obj = {
+      code: 'aaa',
+      address: {
         primary: {
-          street: 'somewhere', 
-          zip: 12345 
+          street: 'somewhere',
+          zip: 12345
         },
         dummy: 'zzzzz'
-      } 
+      }
     }
-    let cmp = shallowVuetable(['code']).vm
+    const cmp = shallowVuetable(['code']).vm
 
     it('returns value inside the given object', () => {
       expect(

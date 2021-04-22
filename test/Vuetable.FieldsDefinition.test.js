@@ -1,7 +1,7 @@
-import Vue from 'vue'
-import { shallow, mount } from '@vue/test-utils'
+import { shallowMount, mount } from '@vue/test-utils'
 import Vuetable from '@/components/Vuetable.vue'
 import SampleComponent from '@/components/VuetableFieldHandle.vue'
+import { createApp, nextTick } from "vue";
 
 describe('Vuetable - Fields Definition', () => {
 
@@ -13,14 +13,14 @@ describe('Vuetable - Fields Definition', () => {
       return msg
     })
   })
-  
+
   afterAll( () => {
     global.console.error.mockReset()
     global.console.error.mockRestore()
     global.console.warn.mockReset()
     global.console.warn.mockRestore()
   })
-  
+
   const expectedResult = [
     {
       name: 'code',
@@ -46,7 +46,7 @@ describe('Vuetable - Fields Definition', () => {
     }
   ]
 
-  const shallowVuetable = (fields) => shallow(Vuetable, {
+  const shallowVuetable = (fields) => shallowMount(Vuetable, {
     propsData: {
       loadOnStart: false,
       fields
@@ -57,13 +57,13 @@ describe('Vuetable - Fields Definition', () => {
   // loading data from API endpoint, so we can test for functionalities
   // that do not relate to AJAX request
   it('should parse basic array correctly', () => {
-    let wrapper = shallowVuetable(['code', 'description'])
+    const wrapper = shallowVuetable(['code', 'description'])
 
     expect(wrapper.vm.tableFields).toEqual(expectedResult)
   })
 
   it('should parse array of object correctly', () => {
-    let wrapper = shallowVuetable([
+    const wrapper = shallowVuetable([
       { name: 'code' },
       { name: 'description' }
     ])
@@ -72,7 +72,7 @@ describe('Vuetable - Fields Definition', () => {
   })
 
   it('should parse mix declaration of string and object correctly', () => {
-    let wrapper = shallowVuetable([
+    const wrapper = shallowVuetable([
       'code',
       { name: 'description' }
     ])
@@ -81,7 +81,7 @@ describe('Vuetable - Fields Definition', () => {
   })
 
   it('should accept (VueComponent) Object in "name" option', () => {
-    let wrapper = shallowVuetable([
+    const wrapper = shallowVuetable([
       { name: SampleComponent }
     ])
 
@@ -89,27 +89,27 @@ describe('Vuetable - Fields Definition', () => {
   })
 
   /**
-   *  title option 
+   *  title option
    */
   it('should set field title to capitalized field name if title is not provided', () => {
-    let wrapper = shallowVuetable(['full name'])
+    const wrapper = shallowVuetable(['full name'])
 
     expect(wrapper.vm.tableFields[0].title).toEqual('Full Name')
   })
 
   it('should override field title with given value', () => {
-    let wrapper = shallowVuetable([
+    const wrapper = shallowVuetable([
       { name: 'code', title: 'My Title' }
     ])
 
     expect(wrapper.vm.tableFields[0].title).toEqual('My Title')
   })
 
-  /** 
+  /**
    * titleClass option
    */
   it('should use the given titleClass to render field title', () => {
-    let wrapper = mount(Vuetable, {
+    const wrapper = mount(Vuetable, {
       propsData: {
         apiMode: false,
         fields: [
@@ -120,7 +120,7 @@ describe('Vuetable - Fields Definition', () => {
 
     expect(wrapper.vm.tableFields[0].titleClass).toEqual('foo-bar')
 
-    let el = wrapper.findAll('th').at(0)
+    const el = wrapper.findAll('th')[0]
     expect(el.attributes().id).toEqual('_code')
     expect(el.classes()).toContain('foo-bar')
     expect(el.classes()).toContain('vuetable-th-code')
@@ -128,16 +128,17 @@ describe('Vuetable - Fields Definition', () => {
 
   /**
    * dataClass option
-   * 
+   *
    * `apiMode` needs to be set to false to manually set the data for the test
    */
   it('should use the given dataClass to render field title', (done) => {
-    let wrapper = shallow(Vuetable, {
+    const app = createApp({})
+    const wrapper = shallowMount(Vuetable, {
       propsData: {
         apiMode: false,
         fields: [
           {
-            name: 'code', 
+            name: 'code',
             dataClass: 'foo-baz'
           }
         ],
@@ -150,9 +151,9 @@ describe('Vuetable - Fields Definition', () => {
     expect(wrapper.vm.tableFields[0].dataClass).toEqual('foo-baz')
     expect(wrapper.vm.tableData.length).toEqual(1)
 
-    Vue.config.errorHandler = done
-    Vue.nextTick( () => {
-      let el = wrapper.findAll('tbody tr td').at(0)
+    app.config.errorHandler = done
+    nextTick( () => {
+      const el = wrapper.findAll('tbody tr td')[0]
       expect(el.classes()).toContain('vuetable-td-code')
       expect(el.classes()).toContain('foo-baz')
       done()
@@ -163,7 +164,7 @@ describe('Vuetable - Fields Definition', () => {
    * sortField option - given
    */
   it('should set sortField to the given value when specified', () => {
-    let wrapper = shallowVuetable([
+    const wrapper = shallowVuetable([
       { name: 'code', sortField: 'aaa' }
     ])
 
@@ -174,7 +175,7 @@ describe('Vuetable - Fields Definition', () => {
    * visible option
    */
   it('should set visible to the given value when specified', () => {
-    let wrapper = shallowVuetable([
+    const wrapper = shallowVuetable([
       { name: 'code', visible: false }
     ])
 
@@ -185,20 +186,21 @@ describe('Vuetable - Fields Definition', () => {
    * formatter option
    */
   it('should give warning when the formatter is not a function', () => {
-    let wrapper = shallowVuetable([
+    const wrapper = shallowVuetable([
       { name: 'code', formatter: 'myFormatter' }
     ])
-    
+
     expect(wrapper.vm.tableFields[0].formatter).toBe(null)
     expect(console.error).toBeCalledWith('code field formatter must be a function')
   })
 
   it('should call the formatter function to format the column value', (done) => {
-    let myFormatter = (value) => {
+    const app = createApp({})
+    const myFormatter = (value) => {
       return value.toUpperCase()
     }
 
-    let wrapper = shallow(Vuetable, {
+    const wrapper = shallowMount(Vuetable, {
       propsData: {
         apiMode: false,
         fields: [
@@ -211,9 +213,9 @@ describe('Vuetable - Fields Definition', () => {
     })
 
     expect(wrapper.vm.tableFields[0].formatter).toEqual(myFormatter)
-    
-    Vue.config.errorHandler = done
-    Vue.nextTick( () => {
+
+    app.config.errorHandler = done
+    nextTick( () => {
       expect(wrapper.find('tbody tr td.vuetable-td-code').text()).toBe('MYCODE')
       done()
     })
@@ -223,10 +225,10 @@ describe('Vuetable - Fields Definition', () => {
    * width option
    */
   it('should set width to the given value when specified', () => {
-    let wrapper = shallowVuetable([
+    const wrapper = shallowVuetable([
       { name: 'code', width: '100px' }
     ])
-    
+
     expect(wrapper.vm.tableFields[0].width).toEqual('100px')
   })
 })

@@ -1,5 +1,5 @@
-import Vue from 'vue'
-import { mount, shallow } from '@vue/test-utils'
+import Vue, {createApp, nextTick} from 'vue'
+import { mount, shallowMount } from '@vue/test-utils'
 import Vuetable from '@/components/Vuetable.vue'
 
 describe('Vuetable - Features', () => {
@@ -11,7 +11,7 @@ describe('Vuetable - Features', () => {
     }
   })
 
-  const shallowVuetable = (fields) => shallow(Vuetable, {
+  const shallowVuetable = (fields) => shallowMount(Vuetable, {
     propsData: {
       loadOnStart: false,
       fields
@@ -22,7 +22,7 @@ describe('Vuetable - Features', () => {
    * title
    */
   it('should render HTML in title', () => {
-    let wrapper = mountVuetable([
+    const wrapper = mountVuetable([
       { name: 'code', title: 'Hi, <strong>there</strong>' }
     ])
 
@@ -31,11 +31,11 @@ describe('Vuetable - Features', () => {
   })
 
   it('should call the function to get title value if title is a Function', () => {
-    let myFunc = () => {
+    const myFunc = () => {
       return 'My Title'
     }
 
-    let wrapper = mountVuetable([
+    const wrapper = mountVuetable([
       { name: 'code', title: myFunc }
     ])
 
@@ -46,7 +46,7 @@ describe('Vuetable - Features', () => {
   })
 
   it('should replace "." with a space if title has not been set and name has "." in it', () => {
-    let wrapper = mountVuetable(['code.line'])
+    const wrapper = mountVuetable(['code.line'])
 
     expect(wrapper.find('thead tr th.vuetable-th-code_line').element.innerHTML)
       .toEqual('Code Line')
@@ -64,7 +64,8 @@ describe('Vuetable - Features', () => {
     })
 
     it('can display data array from "data" prop', (done) => {
-      let wrapper = shallow(Vuetable, {
+      const app = createApp({})
+      const wrapper = shallowMount(Vuetable, {
         propsData: {
           apiMode: false,
           fields: ['code'],
@@ -72,17 +73,18 @@ describe('Vuetable - Features', () => {
         }
       })
 
-      Vue.config.errorHandler = done
-      Vue.nextTick( () => {
-        let nodes = wrapper.findAll('td.vuetable-td-code')
-        expect(nodes.at(0).text()).toEqual('111')
-        expect(nodes.at(1).text()).toEqual('222')
+      app.config.errorHandler = done
+      nextTick( () => {
+        const nodes = wrapper.findAll('td.vuetable-td-code')
+        expect(nodes[0].text()).toEqual('111')
+        expect(nodes[1].text()).toEqual('222')
         done()
       })
     })
 
     it('can display data in an object from "data" prop', (done) => {
-      let wrapper = shallow(Vuetable, {
+      const app = createApp({})
+      const wrapper = shallowMount(Vuetable, {
         propsData: {
           apiMode: false,
           fields: ['code'],
@@ -96,21 +98,22 @@ describe('Vuetable - Features', () => {
         }
       })
 
-      Vue.config.errorHandler = done
-      Vue.nextTick( () => {
-        expect(wrapper.vm.tableData).toBe(data)
-        expect(wrapper.vm.tablePagination).toBe(pagination)
+      app.config.errorHandler = done
+      nextTick( () => {
+        expect(wrapper.vm.tableData).toStrictEqual(data)
+        expect(wrapper.vm.tablePagination).toStrictEqual(pagination)
 
-        let nodes = wrapper.findAll('td.vuetable-td-code')
-        expect(nodes.at(0).text()).toEqual('111')
-        expect(nodes.at(1).text()).toEqual('222')
+        const nodes = wrapper.findAll('td.vuetable-td-code')
+        expect(nodes[0].text()).toEqual('111')
+        expect(nodes[1].text()).toEqual('222')
         done()
       })
     })
 
     it('calls user defined data-manager function', (done) => {
+      const app = createApp({})
       const func = jest.fn()
-      let wrapper = shallow(Vuetable, {
+      const wrapper = shallowMount(Vuetable, {
         propsData: {
           apiMode: false,
           fields: ['code'],
@@ -126,11 +129,11 @@ describe('Vuetable - Features', () => {
       })
 
       expect(wrapper.vm.dataManager).toBe(func)
-      Vue.config.errorHandler = done
-      Vue.nextTick( () => {
+      app.config.errorHandler = done
+      nextTick( () => {
         expect(func).toHaveBeenCalledWith([], {
           'current_page': 1,
-          'from': 1, 
+          'from': 1,
           'last_page': 0,
           'next_page_url': '',
           'per_page': 10,
