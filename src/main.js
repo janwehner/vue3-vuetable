@@ -1,4 +1,4 @@
-import Vue from 'vue'
+import { createApp } from 'vue'
 import Vuetable from './components/Vuetable.vue'
 import VuetablePagination from './components/VuetablePagination.vue'
 import VuetablePaginationDropdown from './components/VuetablePaginationDropdown.vue'
@@ -9,13 +9,230 @@ import VuetableFieldCheckbox from './components/VuetableFieldCheckbox.vue'
 import VuetableFieldHandle from './components/VuetableFieldHandle'
 import VuetableFieldSequence from './components/VuetableFieldSequence.vue'
 
-Vue.component('vuetable-field-checkbox', VuetableFieldCheckbox)
-Vue.component('vuetable-field-handle', VuetableFieldHandle)
-Vue.component('vuetable-field-sequence', VuetableFieldSequence)
+/* eslint-disable no-new */
+const root = {
+  components: {
+    Vuetable,
+    VuetablePagination,
+    VuetablePaginationDropdown,
+    VuetablePaginationInfo,
+  },
+  data() {
+    return {
+      loading: '',
+      searchFor: '',
+      moreParams: {},
+      fields: dataFields,
+      tableHeight: '600px',
+      vuetableFields: false,
+      fieldPrefix: 'vuetable-',
+      sortOrder: [{
+        field: 'name',
+        direction: 'asc',
+      }],
+      multiSort: true,
+      paginationComponent: 'vuetable-pagination',
+      perPage: 10,
+      paginationInfoTemplate: 'Showing record: {from} to {to} from {total} item(s)',
+      lang: lang,
+    }
+  },
+  watch: {
+    'perPage' (val, oldVal) {
+      this.$nextTick(function() {
+        this.$refs.vuetable.refresh()
+      })
+    },
+    'paginationComponent' (val, oldVal) {
+      this.$nextTick(function() {
+        this.$refs.pagination.setPaginationData(this.$refs.vuetable.tablePagination)
+      })
+    }
+  },
+  methods: {
+    transform (data) {
+      let transformed = {}
+      transformed.pagination = {
+        total: data.total,
+        per_page: data.per_page,
+        current_page: data.current_page,
+        last_page: data.last_page,
+        next_page_url: data.next_page_url,
+        prev_page_url: data.prev_page_url,
+        from: data.from,
+        to: data.to
+      }
+
+      transformed.data = []
+      data = data.data
+      for (let i = 0; i < data.length; i++) {
+        transformed['data'].push({
+          id: data[i].id,
+          name: data[i].name,
+          nickname: data[i].nickname,
+          email: data[i].email,
+          age: data[i].age,
+          birthdate: data[i].birthdate,
+          gender: data[i].gender,
+          address: data[i].address.line1 + ' ' + data[i].address.line2 + ' ' + data[i].address.zipcode
+        })
+      }
+
+      return transformed
+    },
+    showSettingsModal () {
+      let self = this
+      $('#settingsModal').modal({
+        detachable: true,
+        onVisible () {
+          $('.ui.checkbox').checkbox()
+        }
+      }).modal('show')
+    },
+    showLoader () {
+      this.loading = 'loading'
+    },
+    hideLoader () {
+      this.loading = ''
+    },
+    setFilter () {
+      this.moreParams.filter = this.searchFor
+      this.$nextTick(function() {
+        this.$refs.vuetable.refresh()
+      })
+    },
+    resetFilter () {
+      this.searchFor = ''
+      this.setFilter()
+    },
+    preg_quote ( str ) {
+      // http://kevin.vanzonneveld.net
+      // +   original by: booeyOH
+      // +   improved by: Ates Goral (http://magnetiq.com)
+      // +   improved by: Kevin van Zonneveld (http://kevin.vanzonneveld.net)
+      // +   bugfixed by: Onno Marsman
+      // *     example 1: preg_quote("$40");
+      // *     returns 1: '\$40'
+      // *     example 2: preg_quote("*RRRING* Hello?");
+      // *     returns 2: '\*RRRING\* Hello\?'
+      // *     example 3: preg_quote("\\.+*?[^]$(){}=!<>|:");
+      // *     returns 3: '\\\.\+\*\?\[\^\]\$\(\)\{\}\=\!\<\>\|\:'
+
+      return (str+'').replace(/([\\\.\+\*\?\[\^\]\$\(\)\{\}\=\!\<\>\|\:])/g, "\\$1");
+    },
+    highlight (needle, haystack) {
+      return haystack.replace(
+        new RegExp('(' + this.preg_quote(needle) + ')', 'ig'),
+        '<span class="highlight">$1</span>'
+      )
+    },
+    rowClassCB (data, index) {
+      return (index % 2) === 0 ? 'odd' : 'even'
+    },
+    onCellClicked (e) {
+      if (e.field.name !== this.fieldPrefix+'actions') {
+        this.$refs.vuetable.toggleDetailRow(e.data.id)
+      }
+    },
+    onCellDoubleClicked ({ data, field, event }) {
+      console.log('cellDoubleClicked:', field.name)
+    },
+    onCellRightClicked (e) {
+      console.log('cellRightClicked:', e.field.name)
+    },
+    onLoadSuccess (response) {
+      // set pagination data to pagination-info component
+      this.$refs.paginationInfo.setPaginationData(response.data)
+
+      let data = response.data.data
+      if (this.searchFor !== '') {
+        for (let n in data) {
+          data[n].name = this.highlight(this.searchFor, data[n].name)
+          data[n].email = this.highlight(this.searchFor, data[n].email)
+        }
+      }
+    },
+    onLoadError (response) {
+      if (response.status == 400) {
+        sweetAlert('Something\'s Wrong!', response.data.message, 'error')
+      } else {
+        sweetAlert('Oops', E_SERVER_ERROR, 'error')
+      }
+    },
+    onPaginationData (tablePagination) {
+      this.$refs.paginationInfo.setPaginationData(tablePagination)
+      this.$refs.pagination.setPaginationData(tablePagination)
+    },
+    onChangePage (page) {
+      this.$refs.vuetable.changePage(page)
+    },
+    onInitialized (fields) {
+      console.log('onInitialized', fields)
+      this.vuetableFields = fields
+    },
+    onDataReset () {
+      console.log('onDataReset')
+      this.$refs.paginationInfo.resetData()
+      this.$refs.pagination.resetData()
+    },
+    onActionClicked (action, data) {
+      console.log('slot actions: on-click', data.name)
+      sweetAlert(action, data.name)
+    },
+    onFieldEvent (type, payload, vuetable) {
+      if (type === 'checkbox-toggled') {
+        vuetable.onCheckboxToggled(payload.isChecked, payload.field, payload.dataItem)
+      } else if (type === 'checkbox-toggled-all') {
+        vuetable.onCheckboxToggledAll(payload.isChecked, payload.field)
+      }
+    },
+    onHeaderEvent (type, payload) {
+      console.log('onHeaderEvent:', type, payload)
+      let vuetable = this.$refs.vuetable
+      switch (type) {
+        case 'order-by':
+          vuetable.orderBy(payload.field, payload.event)
+          break
+        case 'refresh':
+          vuetable.refresh()
+          break
+        case 'add-sort-column':
+          vuetable.addSortColumn(payload.field, payload.direction)
+          break
+        case 'remove-sort-column':
+          vuetable.removeSortColumn(payload.index)
+          break
+        case 'set-sort-column':
+          vuetable.setSortColumnDirection(payload.index, payload.direction)
+          break
+        case 'clear-sort-column':
+          vuetable.clearSortOrder()
+          break
+        case 'toggle-row':
+          vuetable.onCheckboxToggled(payload.isChecked, payload.field, payload.dataItem)
+          break
+        case 'toggle-all-rows':
+          vuetable.onCheckboxToggledAll(payload.isChecked, payload.field)
+          break;
+        case 'filter':
+          vuetable.
+            break;
+        default:
+          console.log('Unhandled event: ', type, payload)
+      }
+    }
+  },
+}
+
+const app = createApp(root)
+
+app.component('vuetable-field-checkbox', VuetableFieldCheckbox)
+app.component('vuetable-field-handle', VuetableFieldHandle)
+app.component('vuetable-field-sequence', VuetableFieldSequence)
 
 let E_SERVER_ERROR = 'Error communicating with the server'
 
-Vue.component('custom-actions', {
+app.component('custom-actions', {
   template: [
     '<div>',
       '<button class="ui red button" @click="onClick(\'view-item\', rowData)"><i class="zoom icon"></i></button>',
@@ -37,7 +254,7 @@ Vue.component('custom-actions', {
   }
 })
 
-Vue.component('my-detail-row', {
+app.component('my-detail-row', {
   template: [
     '<div @click="onClick">',
       '<div class="inline field">',
@@ -75,7 +292,7 @@ Vue.component('my-detail-row', {
   },
 })
 
-Vue.component('settings-modal', {
+app.component('settings-modal', {
   template: `
     <div class="ui small modal" id="settingsModal">
       <div class="header">Settings</div>
@@ -259,217 +476,4 @@ let dataFields = [
   }
 ]
 
-/* eslint-disable no-new */
-let vm = new Vue({
-  el: '#app',
-  components: {
-    Vuetable,
-    VuetablePagination,
-    VuetablePaginationDropdown,
-    VuetablePaginationInfo,
-  },
-  data: {
-    loading: '',
-    searchFor: '',
-    moreParams: {},
-    fields: dataFields,
-    tableHeight: '600px',
-    vuetableFields: false,
-    fieldPrefix: 'vuetable-',
-    sortOrder: [{
-        field: 'name',
-        direction: 'asc',
-    }],
-    multiSort: true,
-    paginationComponent: 'vuetable-pagination',
-    perPage: 10,
-    paginationInfoTemplate: 'Showing record: {from} to {to} from {total} item(s)',
-    lang: lang,
-  },
-  watch: {
-    'perPage' (val, oldVal) {
-      this.$nextTick(function() {
-        this.$refs.vuetable.refresh()
-      })
-    },
-    'paginationComponent' (val, oldVal) {
-      this.$nextTick(function() {
-        this.$refs.pagination.setPaginationData(this.$refs.vuetable.tablePagination)
-      })
-    }
-  },
-  methods: {
-    transform (data) {
-      let transformed = {}
-      transformed.pagination = {
-        total: data.total,
-        per_page: data.per_page,
-        current_page: data.current_page,
-        last_page: data.last_page,
-        next_page_url: data.next_page_url,
-        prev_page_url: data.prev_page_url,
-        from: data.from,
-        to: data.to
-      }
-
-      transformed.data = []
-      data = data.data
-      for (let i = 0; i < data.length; i++) {
-        transformed['data'].push({
-          id: data[i].id,
-          name: data[i].name,
-          nickname: data[i].nickname,
-          email: data[i].email,
-          age: data[i].age,
-          birthdate: data[i].birthdate,
-          gender: data[i].gender,
-          address: data[i].address.line1 + ' ' + data[i].address.line2 + ' ' + data[i].address.zipcode
-        })
-      }
-
-      return transformed
-    },
-    showSettingsModal () {
-      let self = this
-      $('#settingsModal').modal({
-        detachable: true,
-        onVisible () {
-          $('.ui.checkbox').checkbox()
-        }
-      }).modal('show')
-    },
-    showLoader () {
-      this.loading = 'loading'
-    },
-    hideLoader () {
-      this.loading = ''
-    },
-    setFilter () {
-      this.moreParams.filter = this.searchFor
-      this.$nextTick(function() {
-        this.$refs.vuetable.refresh()
-      })
-    },
-    resetFilter () {
-      this.searchFor = ''
-      this.setFilter()
-    },
-    preg_quote ( str ) {
-      // http://kevin.vanzonneveld.net
-      // +   original by: booeyOH
-      // +   improved by: Ates Goral (http://magnetiq.com)
-      // +   improved by: Kevin van Zonneveld (http://kevin.vanzonneveld.net)
-      // +   bugfixed by: Onno Marsman
-      // *     example 1: preg_quote("$40");
-      // *     returns 1: '\$40'
-      // *     example 2: preg_quote("*RRRING* Hello?");
-      // *     returns 2: '\*RRRING\* Hello\?'
-      // *     example 3: preg_quote("\\.+*?[^]$(){}=!<>|:");
-      // *     returns 3: '\\\.\+\*\?\[\^\]\$\(\)\{\}\=\!\<\>\|\:'
-
-      return (str+'').replace(/([\\\.\+\*\?\[\^\]\$\(\)\{\}\=\!\<\>\|\:])/g, "\\$1");
-    },
-    highlight (needle, haystack) {
-      return haystack.replace(
-        new RegExp('(' + this.preg_quote(needle) + ')', 'ig'),
-        '<span class="highlight">$1</span>'
-      )
-    },
-    rowClassCB (data, index) {
-      return (index % 2) === 0 ? 'odd' : 'even'
-    },
-    onCellClicked (data, field, event) {
-      console.log('cellClicked', field.name)
-      if (field.name !== this.fieldPrefix+'actions') {
-        this.$refs.vuetable.toggleDetailRow(data.id)
-      }
-    },
-    onCellDoubleClicked (data, field, event) {
-      console.log('cellDoubleClicked:', field.name)
-    },
-    onCellRightClicked (data, field, event) {
-      console.log('cellRightClicked:', field.name)
-    },
-    onLoadSuccess (response) {
-      // set pagination data to pagination-info component
-      this.$refs.paginationInfo.setPaginationData(response.data)
-
-      let data = response.data.data
-      if (this.searchFor !== '') {
-        for (let n in data) {
-          data[n].name = this.highlight(this.searchFor, data[n].name)
-          data[n].email = this.highlight(this.searchFor, data[n].email)
-        }
-      }
-    },
-    onLoadError (response) {
-      if (response.status == 400) {
-        sweetAlert('Something\'s Wrong!', response.data.message, 'error')
-      } else {
-        sweetAlert('Oops', E_SERVER_ERROR, 'error')
-      }
-    },
-    onPaginationData (tablePagination) {
-      this.$refs.paginationInfo.setPaginationData(tablePagination)
-      this.$refs.pagination.setPaginationData(tablePagination)
-    },
-    onChangePage (page) {
-      this.$refs.vuetable.changePage(page)
-    },
-    onInitialized (fields) {
-      console.log('onInitialized', fields)
-      this.vuetableFields = fields
-    },
-    onDataReset () {
-      console.log('onDataReset')
-      this.$refs.paginationInfo.resetData()
-      this.$refs.pagination.resetData()
-    },
-    onActionClicked (action, data) {
-      console.log('slot actions: on-click', data.name)
-      sweetAlert(action, data.name)
-    },
-    onFieldEvent (type, payload, vuetable) {
-      if (type === 'checkbox-toggled') {
-        vuetable.onCheckboxToggled(payload.isChecked, payload.field, payload.dataItem)
-      } else if (type === 'checkbox-toggled-all') {
-        vuetable.onCheckboxToggledAll(payload.isChecked, payload.field)
-      }
-    },
-    onHeaderEvent (type, payload) {
-      console.log('onHeaderEvent:', type, payload)
-      let vuetable = this.$refs.vuetable
-      switch (type) {
-        case 'order-by':
-          vuetable.orderBy(payload.field, payload.event)
-          break
-        case 'refresh':
-          vuetable.refresh()
-          break
-        case 'add-sort-column':
-          vuetable.addSortColumn(payload.field, payload.direction)
-          break
-        case 'remove-sort-column':
-          vuetable.removeSortColumn(payload.index)
-          break
-        case 'set-sort-column':
-          vuetable.setSortColumnDirection(payload.index, payload.direction)
-          break
-        case 'clear-sort-column':
-          vuetable.clearSortOrder()
-          break
-        case 'toggle-row':
-          vuetable.onCheckboxToggled(payload.isChecked, payload.field, payload.dataItem)
-          break
-        case 'toggle-all-rows':
-          vuetable.onCheckboxToggledAll(payload.isChecked, payload.field)
-          break;
-        case 'filter':
-          vuetable.
-          break;
-        default:
-          console.log('Unhandled event: ', type, payload)
-      }
-    }
-  },
-})
+const vm = app.mount('#app')
