@@ -29,15 +29,5 @@ export default {
       }
     }
   },
-  methods: {
-    registerEvents () {
-      this.$on('vuetable:pagination-data', (tablePagination) => {
-        this.setPaginationData(tablePagination)
-      })
-    }
-  },
-  created () {
-    this.registerEvents()
-  }
 }
 </script>
