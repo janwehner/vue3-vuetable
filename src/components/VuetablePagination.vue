@@ -11,16 +11,16 @@
         <span v-else>&nbsp;&lsaquo;</span>
     </a>
     <template v-if="notEnoughPages">
-      <template v-for="(n, i) in totalPage">
-        <a @click="loadPage(i+firstPage)" :key="i"
+      <template v-for="(n, i) in totalPage" :key="i">
+        <a @click="loadPage(i+firstPage)"
           :class="[$_css.pageClass, isCurrentPage(i+firstPage) ? $_css.activeClass : '']"
           v-html="n">
         </a>
       </template>
     </template>
     <template v-else>
-      <template v-for="(n, i) in windowSize">
-        <a @click="loadPage(windowStart+i+firstPage-1)" :key="i"
+      <template v-for="(n, i) in windowSize" :key="i">
+        <a @click="loadPage(windowStart+i+firstPage-1)"
           :class="[$_css.pageClass, isCurrentPage(windowStart+i+firstPage-1) ? $_css.activeClass : '']"
           v-html="windowStart+n-1">
         </a>
