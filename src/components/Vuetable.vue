@@ -122,6 +122,16 @@ export default {
     VuetableColGroup,
   },
 
+  emits: [
+    'vuetable:initialized', 'vuetable:loading', 'vuetable:loaded', 'vuetable:load-success', 'vuetable:load-error',
+    'vuetable:pagination-data', 'vuetable:scrollbar-visible',
+
+    'vuetable:row-clicked', 'vuetable:row-dblclicked', 'vuetable:detail-row-clicked', 'vuetable:cell-clicked',
+    'vuetable:cell-dblclicked', 'vuetable:cell-rightclicked', 'vuetable:row-mouseover', 'vuetable:field-event',
+    'vuetable:header-event', 'vuetable:data-reset', 'vuetable:checkbox-toggled', 'vuetable:checkbox-toggled-all',
+
+  ],
+
   props: {
     fields: {
       type: Array,
