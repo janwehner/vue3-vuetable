@@ -1,13 +1,13 @@
 {
   "name": "vue3-vuetable",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "description": "Datatable component for Vue 3.x",
   "main": "dist/vue3-vuetable.js",
   "license": "MIT",
   "author": "Rati Wannapanop <rati.wannapanop@gmail.com>",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/janwehner/vuetable-3.git"
+    "url": "git+https://github.com/janwehner/vue3-vuetable.git"
   },
   "private": false,
   "keywords": [
