@@ -6,7 +6,7 @@ module.exports = merge(baseWebpackConfig, {
   mode: 'production',
   entry: './src/index.js',
   output: {
-    filename: 'vuetable-3.js',
+    filename: 'vue3-vuetable.js',
     library: 'Vuetable',
     libraryTarget: 'umd',
     //globalObject: 'typeof self !== \'undefined\' ? self : this',

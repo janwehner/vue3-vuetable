@@ -1,8 +1,8 @@
 {
-  "name": "vuetable-3",
-  "version": "2.0.0-beta.4",
+  "name": "vue3-vuetable",
+  "version": "0.1.0",
   "description": "Datatable component for Vue 3.x",
-  "main": "dist/vuetable-3.js",
+  "main": "dist/vue3-vuetable.js",
   "license": "MIT",
   "author": "Rati Wannapanop <rati.wannapanop@gmail.com>",
   "repository": {
@@ -37,8 +37,7 @@
     "test": "yarn jest"
   },
   "dependencies": {
-    "axios": "^0.21.1",
-    "html-webpack-plugin": "^5.3.1"
+    "axios": "^0.21.1"
   },
   "devDependencies": {
     "@babel/core": "^7.13.16",
@@ -50,6 +49,7 @@
     "babel-loader": "^8.2.2",
     "cross-env": "^7.0.3",
     "css-loader": "^5.2.4",
+    "html-webpack-plugin": "^5.3.1",
     "jest": "^26.6.3",
     "mini-css-extract-plugin": "^1.5.0",
     "moxios": "^0.4.0",
