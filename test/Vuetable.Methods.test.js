@@ -1,5 +1,5 @@
 import { mount, shallowMount } from '@vue/test-utils'
-import Vuetable from '@/components/Vuetable.vue';
+import Vuetable from 'components/Vuetable.vue';
 import {createApp, defineComponent, nextTick} from "vue";
 
 describe('Vuetable - Methods', () => {

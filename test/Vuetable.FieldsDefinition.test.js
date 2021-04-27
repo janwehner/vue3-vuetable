@@ -1,6 +1,6 @@
 import { shallowMount, mount } from '@vue/test-utils'
-import Vuetable from '@/components/Vuetable.vue'
-import SampleComponent from '@/components/VuetableFieldHandle.vue'
+import Vuetable from 'components/Vuetable.vue'
+import SampleComponent from 'components/VuetableFieldHandle.vue'
 import { createApp, nextTick } from "vue";
 
 describe('Vuetable - Fields Definition', () => {

@@ -1,5 +1,5 @@
 import { mount } from '@vue/test-utils'
-import Vuetable from '@/components/Vuetable.vue'
+import Vuetable from 'components/Vuetable.vue'
 
 describe('Vuetable - HTML structure', () => {
 
