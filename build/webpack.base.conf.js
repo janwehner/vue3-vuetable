@@ -1,28 +1,30 @@
-var path = require('path')
-var utils = require('./utils')
-var config = require('../config')
-var vueLoaderConfig = require('./vue-loader.conf')
+const path = require('path');
+const webpack = require('webpack');
+const VueLoaderPlugin = require('vue-loader').VueLoaderPlugin;
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
-function resolve (dir) {
-  return path.join(__dirname, '..', dir)
-}
+const env = process.env.NODE_ENV === 'production'
+  ? 'production'
+  : 'development';
+
+const extractOrInjectStyles = env !== 'production'
+  ? 'vue-style-loader'
+  : MiniCssExtractPlugin.loader;
 
 module.exports = {
+  mode: env,
+
   entry: {
     app: './src/main.js'
   },
   output: {
-    path: config.build.assetsRoot,
     filename: '[name].js',
-    publicPath: process.env.NODE_ENV === 'production'
-      ? config.build.assetsPublicPath
-      : config.dev.assetsPublicPath
   },
   resolve: {
     extensions: ['.js', '.vue', '.json'],
     alias: {
-      'vue$': 'vue/dist/vue.esm.js',
-      '@': resolve('src')
+      vue$: 'vue/dist/vue.esm-bundler.js',
+      '@': path.join(__dirname, '..', 'src')
     }
   },
   module: {
@@ -30,29 +32,32 @@ module.exports = {
       {
         test: /\.vue$/,
         loader: 'vue-loader',
-        options: vueLoaderConfig
       },
       {
         test: /\.js$/,
         loader: 'babel-loader',
-        include: [resolve('src'), resolve('test')]
+        include: path.resolve(__dirname, '../'),
+        exclude: /node_modules/,
       },
       {
-        test: /\.(png|jpe?g|gif|svg)(\?.*)?$/,
-        loader: 'url-loader',
-        options: {
-          limit: 10000,
-          name: utils.assetsPath('img/[name].[hash:7].[ext]')
-        }
+        test: /\.s?css$/,
+        use: [
+          extractOrInjectStyles,
+          'css-loader',
+        ],
       },
-      {
-        test: /\.(woff2?|eot|ttf|otf)(\?.*)?$/,
-        loader: 'url-loader',
-        options: {
-          limit: 10000,
-          name: utils.assetsPath('fonts/[name].[hash:7].[ext]')
-        }
-      }
-    ]
-  }
-}
+    ],
+  },
+  plugins: [
+    new webpack.DefinePlugin({
+      'process.env': env,
+      __VUE_OPTIONS_API__: true,
+      __VUE_PROD_DEVTOOLS__: false
+    }),
+    new VueLoaderPlugin(),
+  ],
+  stats: {
+    children: false,
+    modules: false,
+  },
+};

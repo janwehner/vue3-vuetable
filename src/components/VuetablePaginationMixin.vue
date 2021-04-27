@@ -1,25 +1,15 @@
 <script>
+import CssSemanticUI from './VuetableCssSemanticUI.js'
+
 export default {
+  emits: [
+    'vuetable-pagination:change-page',
+  ],
   props: {
     css: {
       type: Object,
       default () {
-        return {
-          wrapperClass: 'ui right floated pagination menu',
-          activeClass: 'active large',
-          disabledClass: 'disabled',
-          pageClass: 'item',
-          linkClass: 'icon item',
-          paginationClass: 'ui bottom attached segment grid',
-          paginationInfoClass: 'left floated left aligned six wide column',
-          dropdownClass: 'ui search dropdown',
-          icons: {
-            first: 'angle double left icon',
-            prev: 'left chevron icon',
-            next: 'right chevron icon',
-            last: 'angle double right icon',
-          }
-        }
+        return {}
       }
     },
     onEachSide: {
@@ -28,15 +18,25 @@ export default {
         return 2
       }
     },
+    firstPage: {
+      type: Number,
+      default: 1
+    }
   },
   data: function() {
     return {
       eventPrefix: 'vuetable-pagination:',
-      tablePagination: null
+      tablePagination: null,
+      $_css: {}
     }
   },
   computed: {
     totalPage () {
+      return this.tablePagination === null
+        ? 0
+        : this.tablePagination.last_page - this.firstPage + 1
+    },
+    lastPage () {
       return this.tablePagination === null
         ? 0
         : this.tablePagination.last_page
@@ -44,12 +44,12 @@ export default {
     isOnFirstPage () {
       return this.tablePagination === null
         ? false
-        : this.tablePagination.current_page === 1
+        : this.tablePagination.current_page === this.firstPage
     },
     isOnLastPage () {
       return this.tablePagination === null
         ? false
-        : this.tablePagination.current_page === this.tablePagination.last_page
+        : this.tablePagination.current_page === this.lastPage
     },
     notEnoughPages () {
       return this.totalPage < (this.onEachSide * 2) + 4
@@ -61,15 +61,21 @@ export default {
       if (!this.tablePagination || this.tablePagination.current_page <= this.onEachSide) {
         return 1
       } else if (this.tablePagination.current_page >= (this.totalPage - this.onEachSide)) {
-        return this.totalPage - this.onEachSide*2
+        return this.totalPage - this.onEachSide * 2
       }
 
       return this.tablePagination.current_page - this.onEachSide
     },
   },
+  created () {
+    this.mergeCss()
+  },
   methods: {
+    mergeCss () {
+      this.$_css = {...CssSemanticUI.pagination, ...this.css}
+    },
     loadPage (page) {
-      this.$emit(this.eventPrefix+'change-page', page)
+      this.$emit(this.eventPrefix + 'change-page', page)
     },
     isCurrentPage (page) {
       return page === this.tablePagination.current_page
