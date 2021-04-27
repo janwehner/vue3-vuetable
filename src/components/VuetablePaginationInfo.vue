@@ -1,5 +1,5 @@
 <template>
-  <div :class="['vuetable-pagination-info', css.infoClass]"
+  <div :class="['vuetable-pagination-info', $_css.infoClass]"
     v-html="paginationInfo">
   </div>
 </template>
@@ -11,3 +11,10 @@ export default {
   mixins: [PaginationInfoMixin],
 }
 </script>
+<style>
+  .vuetable-pagination-info {
+    margin-top: auto;
+    margin-bottom: auto;
+  }
+</style>
+

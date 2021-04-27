@@ -1,279 +1,41 @@
-import Vue from 'vue'
+import { createApp } from 'vue'
 import Vuetable from './components/Vuetable.vue'
 import VuetablePagination from './components/VuetablePagination.vue'
 import VuetablePaginationDropdown from './components/VuetablePaginationDropdown.vue'
 import VuetablePaginationInfo from './components/VuetablePaginationInfo.vue'
 import axios from 'axios'
 
-let E_SERVER_ERROR = 'Error communicating with the server'
-
-Vue.component('custom-actions', {
-  template: [
-    '<div>',
-      '<button class="ui red button" @click="onClick(\'view-item\', rowData)"><i class="zoom icon"></i></button>',
-      '<button class="ui blue button" @click="onClick(\'edit-item\', rowData)"><i class="edit icon"></i></button>',
-      '<button class="ui green button" @click="onClick(\'delete-item\', rowData)"><i class="delete icon"></i></button>',
-    '</div>'
-  ].join(''),
-  props: {
-    rowData: {
-      type: Object,
-      required: true
-    }
-  },
-  methods: {
-    onClick (action, data) {
-      console.log('actions: on-click', data.name)
-      sweetAlert(action, data.name)
-    },
-  }
-})
-
-Vue.component('my-detail-row', {
-  template: [
-    '<div @click="onClick">',
-      '<div class="inline field">',
-        '<label>Name: </label>',
-        '<span>{{rowData.name}}</span>',
-      '</div>',
-      '<div class="inline field">',
-        '<label>Email: </label>',
-        '<span>{{rowData.email}}</span>',
-      '</div>',
-      '<div class="inline field">',
-        '<label>Nickname: </label>',
-        '<span>{{rowData.nickname}}</span>',
-      '</div>',
-      '<div class="inline field">',
-        '<label>Birthdate: </label>',
-        '<span>{{rowData.birthdate}}</span>',
-      '</div>',
-      '<div class="inline field">',
-        '<label>Gender: </label>',
-        '<span>{{rowData.gender}}</span>',
-      '</div>',
-    '</div>'
-  ].join(''),
-  props: {
-    rowData: {
-      type: Object,
-      required: true
-    }
-  },
-  methods: {
-    onClick (event) {
-      console.log('my-detail-row: on-click', event.target)
-    }
-  },
-})
-
-Vue.component('settings-modal', {
-  template: `
-    <div class="ui small modal" id="settingsModal">
-      <div class="header">Settings</div>
-      <div class="content ui form">
-        <div class="field">
-          <div class="ui checkbox">
-            <input type="checkbox" v-model="$parent.multiSort">
-            <label>Multisort (use Alt+Click)</label>
-          </div>
-        </div>
-        <div class="inline fields">
-          <div class="field">
-            <div class="ui checkbox">
-              <input type="checkbox" checked="$parent.tableHeight" @change="setTableHeight($event)">
-              <label>Table Height</label>
-            </div>
-          </div>
-          <div class="field">
-            <input type="text" v-model="$parent.tableHeight">
-          </div>
-        </div>
-        <div class="ui divider"></div>
-        <div class="field">
-          <label>Pagination:</label>
-          <select class="ui simple dropdown" v-model="$parent.paginationComponent">
-            <option value="vuetable-pagination">vuetable-pagination</option>
-            <option value="vuetable-pagination-dropdown">vuetable-pagination-dropdown</option>
-          </select>
-        </div>
-        <div class="field">
-          <label>Per Page:</label>
-          <select class="ui simple dropdown" v-model="$parent.perPage">
-            <option :value="10">10</option>
-            <option :value="15">15</option>
-            <option :value="20">20</option>
-            <option :value="25">25</option>
-          </select>
-        </div>
-        <div class="ui fluid card">
-          <div class="content">
-            <div class="header">Visible fields</div>
-          </div>
-          <div v-if="vuetableFields" class="content">
-            <div v-for="(field, idx) in vuetableFields" class="field">
-              <div class="ui checkbox">
-                <input type="checkbox" :checked="field.visible" @change="toggleField(idx, $event)">
-                <label>{{ getFieldTitle(field) }}</label>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="actions">
-        <div class="ui cancel button">Close</div>
-      </div>
-    </div>
-  `,
-  props: ['vuetableFields'],
-  data () {
-    return {
-    }
-  },
-  methods: {
-    getFieldTitle (field) {
-      if (typeof(field.title) === 'function') return field.title(true)
-
-      let title = field.title
-      if (title !== '') return this.stripHTML(title)
-
-      title = ''
-      if (field.name.slice(0, 2) === '__') {
-        title = field.name.indexOf(':') >= 0
-          ? field.name.split(':')[1]
-          : field.name.replace('__', '')
-      }
-
-      return title
-    },
-    stripHTML (str) {
-      return str ? str.replace(/(<([^>]+)>)/ig,"") : ''
-    },
-    toggleField (index, event) {
-      console.log('toggleField: ', index, event.target.checked)
-      this.$parent.$refs.vuetable.toggleField(index)
-    },
-    setTableHeight (event) {
-      if (event.target.checked) {
-        this.$parent.tableHeight = '600px'
-        return
-      }
-
-      this.$parent.tableHeight = null
-    }
-  }
-})
-
-let lang = {
-  'nickname': 'Nickname',
-  'birthdate': 'Birthdate',
-}
-
-let tableColumns = [
-  { name: '__handle',
-    width: '50px'
-  },
-  {
-    name: '__sequence',
-    title: 'No.',
-    titleClass: 'right aligned',
-    dataClass: 'right aligned',
-    width: '50px'
-  },
-  {
-    name: '__checkbox',
-    width: '30px',
-    title: 'checkbox',
-    titleClass: 'center aligned',
-    dataClass: 'center aligned'
-  },
-  {
-    name: 'id',
-    title: '<i class="unordered list icon"></i> Detail',
-    dataClass: 'center aligned',
-    width: '100px',
-    callback: 'showDetailRow'
-
-  },
-  {
-    name: 'name',
-    title: '<i class="book icon"></i> Full Name',
-    sortField: 'name',
-    width: '150px'
-  },
-  {
-    name: 'email',
-    title: '<i class="mail outline icon"></i> Email',
-    sortField: 'email',
-    width: '200px',
-    dataClass: "vuetable-clip-text",
-    visible: true
-  },
-  {
-    name: 'nickname',
-    title: (nameOnly = false) => {
-      return nameOnly
-        ? lang['nickname']
-        : `<i class="paw icon"></i> ${lang['nickname']}`
-    },
-    sortField: 'nickname',
-    callback: 'allCap',
-    width: '120px'
-  },
-  {
-    name: 'birthdate',
-    title: (nameOnly = false) => {
-      return nameOnly
-        ? lang['birthdate']
-        : `<i class="orange birthday icon"></i> ${lang['birthdate']}`
-    },
-    sortField: 'birthdate',
-    width: '100px',
-    callback: 'formatDate|D/MM/Y'
-  },
-  {
-    name: 'gender',
-    title: 'Gender',
-    sortField: 'gender',
-    titleClass: 'center aligned',
-    dataClass: 'center aligned',
-    callback: 'gender',
-    width: '100px',
-  },
-  {
-    name: '__component:custom-actions',
-    title: 'Actions',
-    titleClass: 'center aligned',
-    dataClass: 'center aligned',
-    width: '150px'
-  }
-]
+import VuetableFieldCheckbox from './components/VuetableFieldCheckbox.vue'
+import VuetableFieldHandle from './components/VuetableFieldHandle'
+import VuetableFieldSequence from './components/VuetableFieldSequence.vue'
 
 /* eslint-disable no-new */
-let vm = new Vue({
-  el: '#app',
+const root = {
   components: {
     Vuetable,
     VuetablePagination,
     VuetablePaginationDropdown,
     VuetablePaginationInfo,
   },
-  data: {
-    loading: '',
-    searchFor: '',
-    moreParams: { aa: 1111, bb: 222 },
-    fields: tableColumns,
-    tableHeight: '600px',
-    vuetableFields: false,
-    sortOrder: [{
+  data() {
+    return {
+      loading: '',
+      searchFor: '',
+      moreParams: {},
+      fields: dataFields,
+      tableHeight: '600px',
+      vuetableFields: false,
+      fieldPrefix: 'vuetable-',
+      sortOrder: [{
         field: 'name',
         direction: 'asc',
-    }],
-    multiSort: true,
-    paginationComponent: 'vuetable-pagination',
-    perPage: 10,
-    paginationInfoTemplate: 'Showing record: {from} to {to} from {total} item(s)',
-    lang: lang,
+      }],
+      multiSort: true,
+      paginationComponent: 'vuetable-pagination',
+      perPage: 10,
+      paginationInfoTemplate: 'Showing record: {from} to {to} from {total} item(s)',
+      lang: lang,
+    }
   },
   watch: {
     'perPage' (val, oldVal) {
@@ -333,29 +95,8 @@ let vm = new Vue({
     hideLoader () {
       this.loading = ''
     },
-    allCap (value) {
-      return value.toUpperCase()
-    },
-    formatDate (value, fmt) {
-      if (value === null) return ''
-      fmt = (typeof(fmt) === 'undefined') ? 'D MMM YYYY' : fmt
-      return moment(value, 'YYYY-MM-DD').format(fmt)
-    },
-    gender (value) {
-      return value === 'M'
-        ? '<span class="ui teal label"><i class="male icon"></i>Male</span>'
-        : '<span class="ui pink label"><i class="female icon"></i>Female</span>'
-    },
-    showDetailRow (value) {
-      let icon = this.$refs.vuetable.isVisibleDetailRow(value) ? 'down' : 'right'
-      return [
-        '<a class="show-detail-row">',
-            '<i class="chevron circle ' + icon + ' icon"></i>',
-        '</a>'
-      ].join('')
-    },
     setFilter () {
-      this.moreParams['filter'] = this.searchFor
+      this.moreParams.filter = this.searchFor
       this.$nextTick(function() {
         this.$refs.vuetable.refresh()
       })
@@ -388,28 +129,16 @@ let vm = new Vue({
     rowClassCB (data, index) {
       return (index % 2) === 0 ? 'odd' : 'even'
     },
-    /*
-     * Example of defining queryParams as a function
-     */
-    // queryParams (sortOrder, currentPage, perPage) {
-    //   return {
-    //     'sort': sortOrder[0].field + '|' + sortOrder[0].direction,
-    //     'order': sortOrder[0].direction,
-    //     'page': currentPage,
-    //     'per_page': perPage
-    //   }
-    // },
-    onCellClicked (data, field, event) {
-      console.log('cellClicked', field.name)
-      if (field.name !== '__actions') {
-        this.$refs.vuetable.toggleDetailRow(data.id)
+    onCellClicked (e) {
+      if (e.field.name !== this.fieldPrefix+'actions') {
+        this.$refs.vuetable.toggleDetailRow(e.data.id)
       }
     },
-    onCellDoubleClicked (data, field, event) {
+    onCellDoubleClicked ({ data, field, event }) {
       console.log('cellDoubleClicked:', field.name)
     },
-    onCellRightClicked (data, field, event) {
-      console.log('cellRightClicked:', field.name)
+    onCellRightClicked (e) {
+      console.log('cellRightClicked:', e.field.name)
     },
     onLoadSuccess (response) {
       // set pagination data to pagination-info component
@@ -446,5 +175,305 @@ let vm = new Vue({
       this.$refs.paginationInfo.resetData()
       this.$refs.pagination.resetData()
     },
+    onActionClicked (action, data) {
+      console.log('slot actions: on-click', data.name)
+      sweetAlert(action, data.name)
+    },
+    onFieldEvent (type, payload, vuetable) {
+      if (type === 'checkbox-toggled') {
+        vuetable.onCheckboxToggled(payload.isChecked, payload.field, payload.dataItem)
+      } else if (type === 'checkbox-toggled-all') {
+        vuetable.onCheckboxToggledAll(payload.isChecked, payload.field)
+      }
+    },
+    onHeaderEvent (type, payload) {
+      console.log('onHeaderEvent:', type, payload)
+      let vuetable = this.$refs.vuetable
+      switch (type) {
+        case 'order-by':
+          vuetable.orderBy(payload.field, payload.event)
+          break
+        case 'refresh':
+          vuetable.refresh()
+          break
+        case 'add-sort-column':
+          vuetable.addSortColumn(payload.field, payload.direction)
+          break
+        case 'remove-sort-column':
+          vuetable.removeSortColumn(payload.index)
+          break
+        case 'set-sort-column':
+          vuetable.setSortColumnDirection(payload.index, payload.direction)
+          break
+        case 'clear-sort-column':
+          vuetable.clearSortOrder()
+          break
+        case 'toggle-row':
+          vuetable.onCheckboxToggled(payload.isChecked, payload.field, payload.dataItem)
+          break
+        case 'toggle-all-rows':
+          vuetable.onCheckboxToggledAll(payload.isChecked, payload.field)
+          break;
+        case 'filter':
+          vuetable.
+            break;
+        default:
+          console.log('Unhandled event: ', type, payload)
+      }
+    }
+  },
+}
+
+const app = createApp(root)
+
+app.component('vuetable-field-checkbox', VuetableFieldCheckbox)
+app.component('vuetable-field-handle', VuetableFieldHandle)
+app.component('vuetable-field-sequence', VuetableFieldSequence)
+
+let E_SERVER_ERROR = 'Error communicating with the server'
+
+app.component('custom-actions', {
+  template: [
+    '<div>',
+      '<button class="ui red button" @click="onClick(\'view-item\', rowData)"><i class="zoom icon"></i></button>',
+      '<button class="ui blue button" @click="onClick(\'edit-item\', rowData)"><i class="edit icon"></i></button>',
+      '<button class="ui green button" @click="onClick(\'delete-item\', rowData)"><i class="delete icon"></i></button>',
+    '</div>'
+  ].join(''),
+  props: {
+    rowData: {
+      type: Object,
+      required: true
+    }
+  },
+  methods: {
+    onClick (action, data) {
+      console.log('actions: on-click', data.name)
+      sweetAlert(action, data.name)
+    },
+  }
+})
+
+app.component('my-detail-row', {
+  template: [
+    '<div @click="onClick">',
+      '<div class="inline field">',
+        '<label>Name: </label>',
+        '<span>{{rowData.name}}</span>',
+      '</div>',
+      '<div class="inline field">',
+        '<label>Email: </label>',
+        '<span>{{rowData.email}}</span>',
+      '</div>',
+      '<div class="inline field">',
+        '<label>Nickname: </label>',
+        '<span>{{rowData.nickname}}</span>',
+      '</div>',
+      '<div class="inline field">',
+        '<label>Birthdate: </label>',
+        '<span>{{rowData.birthdate}}</span>',
+      '</div>',
+      '<div class="inline field">',
+        '<label>Gender: </label>',
+        '<span>{{rowData.gender}}</span>',
+      '</div>',
+    '</div>'
+  ].join(''),
+  props: {
+    rowData: {
+      type: Object,
+      required: true
+    }
+  },
+  methods: {
+    onClick (event) {
+      console.log('my-detail-row: on-click', event.target)
+    }
   },
 })
+
+app.component('settings-modal', {
+  template: `
+    <div class="ui small modal" id="settingsModal">
+      <div class="header">Settings</div>
+      <div class="content ui form">
+        <div class="field">
+          <div class="ui checkbox">
+            <input type="checkbox" v-model="$parent.multiSort">
+            <label>Multisort (use Alt+Click)</label>
+          </div>
+        </div>
+        <div class="ui divider"></div>
+        <div class="field">
+          <label>Pagination:</label>
+          <select class="ui simple dropdown" v-model="$parent.paginationComponent">
+            <option value="vuetable-pagination">vuetable-pagination</option>
+            <option value="vuetable-pagination-dropdown">vuetable-pagination-dropdown</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Per Page:</label>
+          <select class="ui simple dropdown" v-model="$parent.perPage">
+            <option :value="10">10</option>
+            <option :value="15">15</option>
+            <option :value="20">20</option>
+            <option :value="25">25</option>
+          </select>
+        </div>
+        <div class="ui fluid card">
+          <div class="content">
+            <div class="header">Visible fields</div>
+          </div>
+          <div v-if="vuetableFields" class="content">
+            <div v-for="(field, idx) in vuetableFields" class="field">
+              <div class="ui checkbox">
+                <input type="checkbox" :checked="field.visible" @change="toggleField(idx, $event)">
+                <label>{{ getFieldTitle(field) }}</label>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="actions">
+        <div class="ui cancel button">Close</div>
+      </div>
+    </div>
+  `,
+  props: ['vuetableFields', 'fieldPrefix'],
+  data () {
+    return {
+    }
+  },
+  methods: {
+    getFieldTitle (field) {
+      if (typeof(field.title) === 'function') return field.title(true)
+
+      let title = field.title
+      if (title !== '') return this.stripHTML(title)
+
+      title = ''
+      if (field.name.slice(0, 2) === this.fieldPrefix) {
+        title = field.name.indexOf(':') >= 0
+          ? field.name.split(':')[1]
+          : field.name.replace(this.fieldPrefix, '')
+      }
+
+      return title
+    },
+    stripHTML (str) {
+      return str ? str.replace(/(<([^>]+)>)/ig,"") : ''
+    },
+    toggleField (index, event) {
+      console.log('toggleField: ', index, event.target.checked)
+      this.$parent.$refs.vuetable.toggleField(index)
+    }
+  }
+})
+
+let lang = {
+  'nickname': 'Nickname',
+  'birthdate': 'Birthdate',
+}
+
+let dataFields = [
+  {
+    name: '__handle',
+    width: '40px'
+  },
+  {
+    name: '__sequence',
+    title: 'No.',
+    width: '50px',
+    titleClass: 'right aligned',
+    dataClass: 'right aligned'
+  },
+  {
+    name: '__checkbox',
+    title: 'checkbox',
+    width: '30px',
+    titleClass: 'center aligned',
+    dataClass: 'center aligned'
+  },
+  {
+    name: 'id',
+    title: '<i class="unordered list icon"></i> Detail',
+    width: '80px',
+    dataClass: 'center aligned',
+    formatter: (value, vuetable) => {
+      let icon = vuetable.isVisibleDetailRow(value) ? 'down' : 'right'
+      return [
+        '<a class="show-detail-row">',
+            '<i class="chevron circle ' + icon + ' icon"></i>',
+        '</a>'
+      ].join('')
+    },
+
+  },
+  {
+    name: 'name',
+    title: '<i class="book icon"></i> Full Name',
+    sortField: 'name',
+    width: '150px',
+    filterable: true,
+  },
+  {
+    name: 'email',
+    title: '<i class="mail outline icon"></i> Email',
+    sortField: 'email',
+    width: '200px',
+    visible: true,
+    filterable: true,
+  },
+  {
+    name: 'nickname',
+    title: (nameOnly = false) => {
+      return nameOnly
+        ? lang['nickname']
+        : `<i class="paw icon"></i> ${lang['nickname']}`
+    },
+    sortField: 'nickname',
+    width: '120px',
+    formatter: (value) => {
+      return value.toUpperCase()
+    },
+    filterable: true,
+  },
+  {
+    name: 'birthdate',
+    title: (nameOnly = false) => {
+      return nameOnly
+        ? lang['birthdate']
+        : `<i class="orange birthday icon"></i> ${lang['birthdate']}`
+    },
+    width: '100px',
+    sortField: 'birthdate',
+    formatter: (value) => {
+      if (value === null) return ''
+      return moment(value, 'YYYY-MM-DD').format('D MMM YYYY')
+    },
+    filterable: true,
+  },
+  {
+    name: 'gender',
+    title: 'Gender',
+    sortField: 'gender',
+    width: '100px',
+    titleClass: 'center aligned',
+    dataClass: 'center aligned',
+    formatter: (value) => {
+      return value === 'M'
+        ? '<span class="ui teal label"><i class="male icon"></i>Male</span>'
+        : '<span class="ui pink label"><i class="female icon"></i>Female</span>'
+    },
+    filterable: true,
+  },
+  {
+    name: 'slot-actions',
+    title: 'Actions',
+    width: '140px',
+    titleClass: 'center aligned',
+    dataClass: 'center aligned'
+  }
+]
+
+const vm = app.mount('#app')
