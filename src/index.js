@@ -13,12 +13,12 @@ import VuetableFieldHandle from './components/VuetableFieldHandle.vue';
 import VuetableFieldSequence from './components/VuetableFieldSequence.vue';
 import VuetableRowHeader from './components/VuetableRowHeader.vue';
 import VuetableColGutter from './components/VuetableColGutter.vue';
-//import Promise from 'promise-polyfill';
+import Promise from 'promise-polyfill';
 
-// const rootVariable = (typeof self === 'object' && self.self === self && self) || (typeof global === 'object' && global) || this;
-// if (!rootVariable.Promise) {
-//   rootVariable.Promise = Promise;
-// }
+const rootVariable = (typeof self === 'object' && self.self === self && self) || (typeof global === 'object' && global) || this;
+if (!rootVariable.Promise) {
+  rootVariable.Promise = Promise;
+}
 
 export default Vuetable;
 export {
