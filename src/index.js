@@ -20,7 +20,18 @@ if (!rootVariable.Promise) {
   rootVariable.Promise = Promise;
 }
 
-export default Vuetable;
+function install(Vue) {
+  Vue.component('vuetable', Vuetable);
+  Vue.component('vuetable-col-gutter', VuetableColGutter)
+  Vue.component('vuetable-field-checkbox', VuetableFieldCheckbox)
+  Vue.component('vuetable-field-handle', VuetableFieldHandle)
+  Vue.component('vuetable-field-sequence', VuetableFieldSequence)
+  Vue.component('vuetable-pagination', VuetablePagination);
+  Vue.component('vuetable-pagination-dropdown', VuetablePaginationDropDown);
+  Vue.component('vuetable-pagination-info', VuetablePaginationInfo);
+  Vue.component('vuetable-row-header', VuetableRowHeader)
+}
+
 export {
   Vuetable,
   // Mixins
@@ -37,39 +48,8 @@ export {
   VuetablePaginationDropDown,
   VuetablePaginationInfo,
   VuetableRowHeader,
+
+  install
 };
 
-// export default {
-//   /**
-//    * @param {import('vue').App} app
-//    */
-//   install: (app) => {
-//     app.component("vuetable", Vuetable);
-//     app.component("vuetable-col-gutter", VuetableColGutter);
-//     app.component("vuetable-field-checkbox", VuetableFieldCheckbox);
-//     app.component("vuetable-field-handle", VuetableFieldHandle);
-//     app.component("vuetable-field-sequence", VuetableFieldSequence);
-//     app.component("vuetable-pagination", VuetablePagination);
-//     app.component("vuetable-pagination-dropdown", VuetablePaginationDropDown);
-//     app.component("vuetable-pagination-info", VuetablePaginationInfo);
-//     app.component("vuetable-row-header", VuetableRowHeader)
-//   },
-// }
-
-// export {
-//   Vuetable,
-//   // Mixins
-//   VuetableFieldMixin,
-//   VuetableFieldCheckboxMixin,
-//   VuetablePaginationInfoMixin,
-//   VuetablePaginationMixin,
-//   // UI components
-//   VuetableColGutter,
-//   VuetableFieldCheckbox,
-//   VuetableFieldHandle,
-//   VuetableFieldSequence,
-//   VuetablePagination,
-//   VuetablePaginationDropDown,
-//   VuetablePaginationInfo,
-//   VuetableRowHeader,
-// };
+export default Vuetable;
