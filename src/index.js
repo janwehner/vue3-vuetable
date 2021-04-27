@@ -32,6 +32,8 @@ function install(Vue) {
   Vue.component('vuetable-row-header', VuetableRowHeader)
 }
 
+Vuetable.install = install;
+
 export {
   Vuetable,
   // Mixins
