@@ -55,6 +55,7 @@
     "moxios": "^0.4.0",
     "promise-polyfill": "^8.2.0",
     "terser-webpack-plugin": "^5.1.1",
+    "typescript": "^4.5.4",
     "vue": "3.0.11",
     "vue-jest": "^5.0.0-alpha.7",
     "vue-loader": "^16.2.0",
