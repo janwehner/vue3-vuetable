@@ -46,6 +46,7 @@
                                :vuetable="vuetable"
                                :class="bodyClass('vuetable-component', field)"
                                :style="{width: field.width}"
+                               :key="item[trackBy]"
                                @vuetable:field-event="onFieldEvent"
                     ></component>
                   </template>
