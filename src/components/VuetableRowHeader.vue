@@ -57,7 +57,7 @@ export default {
     },
 
     css() {
-      return this.$parent.$_css
+      return this.$parent.customCss
     },
 
     vuetable() {
