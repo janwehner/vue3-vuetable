@@ -1,7 +1,7 @@
 <template>
-  <div :class="$_css.tableWrapper">
+  <div :class="customCss.tableWrapper">
     <div class="vuetable-head-wrapper" v-if="isFixedHeader">
-      <table :class="['vuetable', $_css.tableClass, $_css.tableHeaderClass]">
+      <table :class="['vuetable', customCss.tableClass, customCss.tableHeaderClass]">
         <vuetable-col-group :is-header="true" :fieldPrefix="fieldPrefix" />
         <thead>
           <slot name="tableHeader" :fields="tableFields">
@@ -16,7 +16,7 @@
     </div>
 
     <div class="vuetable-body-wrapper" :class="{'fixed-header' : isFixedHeader}" :style="{height: tableHeight}">
-      <table :class="['vuetable', isFixedHeader ? 'fixed-header' : '', $_css.tableClass, $_css.tableBodyClass]">
+      <table :class="['vuetable', isFixedHeader ? 'fixed-header' : '', customCss.tableClass, customCss.tableBodyClass]">
         <vuetable-col-group :fieldPrefix="fieldPrefix" />
         <thead v-if="!isFixedHeader">
           <slot name="tableHeader" :fields="tableFields">
@@ -333,7 +333,7 @@ export default {
       lastScrollPosition: 0,
       scrollBarWidth: '17px', //chrome default
       scrollVisible: false,
-      $_css: {}
+      customCss: {}
     }
   },
 
@@ -494,7 +494,7 @@ export default {
     },
 
     mergeCss () {
-      this.$_css = { ...CssSemanticUI.table, ...this.css }
+      this.customCss = { ...CssSemanticUI.table, ...this.css }
     },
 
     bodyClass (base, field) {

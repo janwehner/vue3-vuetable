@@ -1,9 +1,9 @@
 <template>
-  <th v-if="isHeader" 
+  <th v-if="isHeader"
     class="vuetable-th-component-handle"
     v-html="title"
   ></th>
-  <td v-else 
+  <td v-else
     class="vuetable-td-component-handle"
     v-html="renderIconTag(['handle-icon', css.handleIcon])"
   ></td>
@@ -19,7 +19,7 @@ export default {
 
   computed: {
     css() {
-      return this.vuetable.$_css
+      return this.vuetable.customCss
     }
   },
 

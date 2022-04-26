@@ -1,5 +1,5 @@
 <template>
-  <div :class="['vuetable-pagination-info', $_css.infoClass]"
+  <div :class="['vuetable-pagination-info', customCss.infoClass]"
     v-html="paginationInfo">
   </div>
 </template>
