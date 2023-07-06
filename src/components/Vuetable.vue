@@ -110,7 +110,7 @@
 </template>
 
 <script>
-import axios from 'axios'
+import {axios} from 'axios'
 import VuetableRowHeader from './VuetableRowHeader.vue'
 import VuetableColGroup from './VuetableColGroup.vue'
 import CssSemanticUI from './VuetableCssSemanticUI.js'
