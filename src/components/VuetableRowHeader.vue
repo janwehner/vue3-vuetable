@@ -1,12 +1,12 @@
 <template>
-  <tr>
+  <tr :key="key">
     <template v-for="(field, fieldIndex) in vuetable.tableFields">
       <template v-if="field.visible">
         <template v-if="vuetable.isFieldComponent(field.name)">
           <component :is="field.name"
                      :row-field="field"
                      :is-header="true"
-                     :title="renderTitle(field)"
+                     :v-html="renderTitle(field)"
                      :vuetable="vuetable"
                      :key="fieldIndex"
                      :class="headerClass('vuetable-th-component', field)"
@@ -44,6 +44,11 @@ import VuetableFieldSequence from './VuetableFieldSequence.vue'
 import VuetableColGutter from './VuetableColGutter.vue'
 
 export default {
+  data(){
+    return {
+      key: 1,
+    }
+  },
   components: {
     'vuetable-field-checkbox': VuetableFieldCheckbox,
     'vuetable-field-handle'  : VuetableFieldHandle,
@@ -188,6 +193,7 @@ export default {
 
     onColumnHeaderClicked (field, event) {
       this.vuetable.orderBy(field, event)
+      this.key = this.key === 1 ? 2 : 1
     }
   }
 }
