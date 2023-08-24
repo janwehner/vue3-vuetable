@@ -403,12 +403,6 @@ export default {
     this.$nextTick( () => {
       this.fireEvent('initialized', this.tableFields)
     })
-    this.fields.forEach(field => {
-      if(this.isSortable(field))
-      {
-        this.addSortColumn(field, 'asc')
-      }
-    });
   },
 
   mounted () {
