@@ -1,7 +1,8 @@
 import axios from 'axios'
 import moxios from 'moxios'
-import { mount, shallowMount } from '@vue/test-utils'
-import Vuetable from 'components/Vuetable.vue'
+import { shallowMount, mount } from '@vue/test-utils'
+import Vuetable from '../src/components/Vuetable.vue'
+import {expect, jest, describe, beforeEach, afterEach, it} from '@jest/globals'
 
 describe('AJAX functionality', () => {
   let  apiUrl, response

@@ -3,7 +3,7 @@ module.exports = {
     "VERSION": "dummy4test"
   },
   transform: {
-    "^.+\\.vue$": "vue-jest",
+    "^.+\\.vue$": "@vue/vue3-jest",
     "^.+\\js$": "babel-jest"
   },
   moduleFileExtensions: ['vue', 'js', 'json'],
@@ -12,4 +12,9 @@ module.exports = {
     "node_modules",
     "src"
   ],
+  testEnvironment: 'jsdom',
+
+  testEnvironmentOptions: {
+    customExportConditions: ["node", "node-addons"],
+  },
 }

@@ -1,6 +1,7 @@
-import Vue, {createApp, nextTick} from 'vue'
+import {createApp, nextTick} from 'vue'
 import { mount, shallowMount } from '@vue/test-utils'
 import Vuetable from 'components/Vuetable.vue'
+import {expect, jest, describe, it} from '@jest/globals'
 
 describe('Vuetable - Features', () => {
 
