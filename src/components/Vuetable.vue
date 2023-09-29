@@ -464,7 +464,7 @@ export default {
       let horizontal = e.currentTarget.scrollLeft;
 
       //don't modify header scroll if we are scrolling vertically
-      if (horizontal != this.lastScrollPosition) {
+      if (horizontal !== this.lastScrollPosition) {
         let header = this.$el.getElementsByClassName('vuetable-head-wrapper')[0]
         if (header != null) {
           header.scrollLeft = horizontal;
@@ -727,7 +727,7 @@ export default {
     },
 
     getSortParam () {
-      if (!this.sortOrder || this.sortOrder.field == '') {
+      if (!this.sortOrder || this.sortOrder.field === '') {
         return ''
       }
 
@@ -910,7 +910,7 @@ export default {
     },
 
     gotoPage (page) {
-      if (page != this.currentPage && (page >= this.firstPage && page <= this.tablePagination.last_page)) {
+      if (page !== this.currentPage && (page >= this.firstPage && page <= this.tablePagination.last_page)) {
         this.currentPage = page
         this.loadData()
       }

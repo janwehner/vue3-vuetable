@@ -30,7 +30,7 @@ export default {
   },
   computed: {
     paginationInfo () {
-      if (this.tablePagination == null || this.tablePagination.total == 0) {
+      if (this.tablePagination == null || this.tablePagination.total === 0) {
         return this.noDataTemplate
       }
 
