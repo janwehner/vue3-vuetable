@@ -179,25 +179,19 @@ export default {
     },
     queryParams: {
       type: [Object, Function],
-      default () {
-        return {
-          sort: 'sort',
-          page: 'page',
-          perPage: 'per_page'
-        }
-      }
+      default: () => ({
+        sort: 'sort',
+        page: 'page',
+        perPage: 'per_page'
+      })
     },
     appendParams: {
       type: Object,
-      default () {
-        return {}
-      }
+      default: () => ({})
     },
     httpOptions: {
       type: Object,
-      default () {
-        return {}
-      }
+      default: () => ({})
     },
     httpFetch: {
       type: Function,
@@ -223,9 +217,7 @@ export default {
     },
     sortOrder: {
       type: Array,
-      default () {
-        return []
-      }
+      default: []
     },
     multiSort: {
       type: Boolean,
@@ -262,9 +254,7 @@ export default {
     },
     detailRowOptions: {
       type: Object,
-      default() {
-        return {}
-      }
+      default: () => ({})
     },
     trackBy: {
       type: String,
@@ -272,9 +262,7 @@ export default {
     },
     css: {
       type: Object,
-      default () {
-        return {}
-      }
+      default: () => ({})
     },
     minRows: {
       type: Number,
@@ -286,9 +274,7 @@ export default {
     },
     noDataTemplate: {
       type: String,
-      default() {
-        return 'No Data Available'
-      }
+      default: 'No Data Available'
     },
     showSortIcons: {
       type: Boolean,
@@ -296,9 +282,7 @@ export default {
     },
     headerRows: {
       type: Array,
-      default() {
-        return ['VuetableRowHeader']
-      }
+      default: ['VuetableRowHeader']
     },
     transform: {
       type: Function,
@@ -310,15 +294,11 @@ export default {
     },
     fieldPrefix: {
       type: String,
-      default() {
-        return 'vuetable-field-'
-      }
+      default: 'vuetable-field-'
     },
     eventPrefix: {
       type: String,
-      default() {
-        return 'vuetable:'
-      }
+      default: 'vuetable:'
     }
   },
 
