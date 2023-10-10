@@ -18,7 +18,7 @@ export default {
     },
 
     isAllItemsInCurrentPageSelected() {
-      if (! this.vuetable.tableData) return 
+      if (! this.vuetable.tableData) return
 
       let idColumn = this.vuetable.trackBy
       let checkbox = this.$el.querySelector('input[type=checkbox]')
@@ -38,7 +38,7 @@ export default {
       else {
         checkbox.indeterminate = false
         return true
-      }            
+      }
     }
   }
 }

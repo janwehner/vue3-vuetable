@@ -38,10 +38,10 @@
   </tr>
 </template>
 <script>
-import VuetableFieldCheckbox from './VuetableFieldCheckbox'
-import VuetableFieldHandle from './VuetableFieldHandle'
-import VuetableFieldSequence from './VuetableFieldSequence'
-import VuetableColGutter from './VuetableColGutter'
+import VuetableFieldCheckbox from './VuetableFieldCheckbox.vue'
+import VuetableFieldHandle from './VuetableFieldHandle.vue'
+import VuetableFieldSequence from './VuetableFieldSequence.vue'
+import VuetableColGutter from './VuetableColGutter.vue'
 
 export default {
   components: {
@@ -90,7 +90,7 @@ export default {
       let i = this.currentSortOrderPosition(field)
 
       if (i !== false) {
-        cls = (this.sortOrder[i].direction == 'asc') ? this.css.ascendingClass : this.css.descendingClass
+        cls = (this.sortOrder[i].direction === 'asc') ? this.css.ascendingClass : this.css.descendingClass
       }
 
       return cls;
@@ -101,7 +101,7 @@ export default {
       let i = this.currentSortOrderPosition(field)
 
       if (i !== false) {
-        cls = (this.sortOrder[i].direction == 'asc') ? this.css.ascendingIcon : this.css.descendingIcon
+        cls = (this.sortOrder[i].direction === 'asc') ? this.css.ascendingIcon : this.css.descendingIcon
       }
 
       return cls;
@@ -112,7 +112,7 @@ export default {
     },
 
     hasSortableIcon (field) {
-      return this.vuetable.isSortable(field) && this.css.sortableIcon != ''
+      return this.vuetable.isSortable(field) && this.css.sortableIcon !== ''
     },
 
     currentSortOrderPosition (field) {
@@ -175,9 +175,7 @@ export default {
         step = (max - min) / (count-1)
       }
 
-      let opacity = max - current * step
-
-      return opacity
+      return max - current * step
     },
 
     renderIconTag (classes, options = '') {

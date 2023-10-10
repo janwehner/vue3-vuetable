@@ -1,7 +1,9 @@
-import { shallowMount, mount } from '@vue/test-utils'
-import Vuetable from 'components/Vuetable.vue'
-import SampleComponent from 'components/VuetableFieldHandle.vue'
-import { createApp, nextTick } from "vue";
+import { createApp, nextTick } from 'vue';
+import { shallowMount, mount } from '@vue/test-utils';
+import Vuetable from 'components/Vuetable.vue';
+import SampleComponent from 'components/VuetableFieldHandle.vue';
+import {expect, jest, describe, beforeAll, afterAll, it} from '@jest/globals';
+
 
 describe('Vuetable - Fields Definition', () => {
 

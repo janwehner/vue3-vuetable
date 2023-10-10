@@ -17,15 +17,15 @@ module.exports = merge(baseWebpackConfig, {
     emitOnErrors: false,
   },
   devServer: {
-    hot: true,
-    hotOnly: true,
+    hot: 'only',
     open: true,
-    inline: true,
-    stats: {
-      children: false,
-      modules: false,
-      chunks: false,
+    devMiddleware: {
+      stats: {
+        children: false,
+        modules: false,
+        chunks: false,
+      },
     },
-    port: 8080,
+    port: 8088,
   },
 });

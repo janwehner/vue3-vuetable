@@ -111,8 +111,8 @@
 
 <script>
 import axios from 'axios'
-import VuetableRowHeader from './VuetableRowHeader'
-import VuetableColGroup from './VuetableColGroup'
+import VuetableRowHeader from './VuetableRowHeader.vue'
+import VuetableColGroup from './VuetableColGroup.vue'
 import CssSemanticUI from './VuetableCssSemanticUI.js'
 
 export default {
@@ -179,25 +179,19 @@ export default {
     },
     queryParams: {
       type: [Object, Function],
-      default () {
-        return {
-          sort: 'sort',
-          page: 'page',
-          perPage: 'per_page'
-        }
-      }
+      default: () => ({
+        sort: 'sort',
+        page: 'page',
+        perPage: 'per_page'
+      })
     },
     appendParams: {
       type: Object,
-      default () {
-        return {}
-      }
+      default: () => ({})
     },
     httpOptions: {
       type: Object,
-      default () {
-        return {}
-      }
+      default: () => ({})
     },
     httpFetch: {
       type: Function,
@@ -223,9 +217,7 @@ export default {
     },
     sortOrder: {
       type: Array,
-      default () {
-        return []
-      }
+      default: []
     },
     multiSort: {
       type: Boolean,
@@ -262,9 +254,7 @@ export default {
     },
     detailRowOptions: {
       type: Object,
-      default() {
-        return {}
-      }
+      default: () => ({})
     },
     trackBy: {
       type: String,
@@ -272,9 +262,7 @@ export default {
     },
     css: {
       type: Object,
-      default () {
-        return {}
-      }
+      default: () => ({})
     },
     minRows: {
       type: Number,
@@ -286,9 +274,7 @@ export default {
     },
     noDataTemplate: {
       type: String,
-      default() {
-        return 'No Data Available'
-      }
+      default: 'No Data Available'
     },
     showSortIcons: {
       type: Boolean,
@@ -296,9 +282,7 @@ export default {
     },
     headerRows: {
       type: Array,
-      default() {
-        return ['VuetableRowHeader']
-      }
+      default: ['VuetableRowHeader']
     },
     transform: {
       type: Function,
@@ -310,15 +294,11 @@ export default {
     },
     fieldPrefix: {
       type: String,
-      default() {
-        return 'vuetable-field-'
-      }
+      default: 'vuetable-field-'
     },
     eventPrefix: {
       type: String,
-      default() {
-        return 'vuetable:'
-      }
+      default: 'vuetable:'
     }
   },
 
@@ -484,7 +464,7 @@ export default {
       let horizontal = e.currentTarget.scrollLeft;
 
       //don't modify header scroll if we are scrolling vertically
-      if (horizontal != this.lastScrollPosition) {
+      if (horizontal !== this.lastScrollPosition) {
         let header = this.$el.getElementsByClassName('vuetable-head-wrapper')[0]
         if (header != null) {
           header.scrollLeft = horizontal;
@@ -747,7 +727,7 @@ export default {
     },
 
     getSortParam () {
-      if (!this.sortOrder || this.sortOrder.field == '') {
+      if (!this.sortOrder || this.sortOrder.field === '') {
         return ''
       }
 
@@ -814,7 +794,7 @@ export default {
       this.sortOrder.push({
         field: field.name,
         sortField: field.sortField,
-        direction: 'asc'
+        direction: direction
       });
     },
 
@@ -930,7 +910,7 @@ export default {
     },
 
     gotoPage (page) {
-      if (page != this.currentPage && (page >= this.firstPage && page <= this.tablePagination.last_page)) {
+      if (page !== this.currentPage && (page >= this.firstPage && page <= this.tablePagination.last_page)) {
         this.currentPage = page
         this.loadData()
       }
