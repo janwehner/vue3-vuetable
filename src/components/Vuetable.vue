@@ -794,7 +794,7 @@ export default {
       this.sortOrder.push({
         field: field.name,
         sortField: field.sortField,
-        direction: 'asc'
+        direction: direction
       });
     },
 
